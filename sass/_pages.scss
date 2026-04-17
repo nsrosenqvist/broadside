@@ -1,0 +1,48 @@
+// ============================================================
+// Section & 404 pages
+// ============================================================
+
+.section-header {
+  margin-bottom: 32px;
+}
+
+.section-header__title {
+  font-family: $serif;
+  font-size: 26px;
+  font-weight: 500;
+  color: $text-primary;
+}
+
+
+// --- 404 page ------------------------------------------------
+
+.not-found {
+  text-align: center;
+  padding: 80px 0;
+}
+
+.not-found__heading {
+  font-family: $serif;
+  font-size: 32px;
+  font-weight: 500;
+  color: $text-primary;
+  margin-bottom: 12px;
+}
+
+.not-found__text {
+  font-family: $body-serif;
+  font-size: 16px;
+  color: $text-secondary;
+
+  a {
+    color: $accent;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 2px;
+    transition: text-decoration-color $transition-base;
+
+    &:hover {
+      text-decoration-color: $accent;
+    }
+  }
+}

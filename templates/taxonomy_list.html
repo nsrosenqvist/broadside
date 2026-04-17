@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ taxonomy.name | title }} — {{ config.title }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+
+  <header class="section-header">
+    <h1 class="section-header__title">{{ taxonomy.name | title }}</h1>
+  </header>
+
+  <ul class="post-list">
+    {% for term in terms %}
+    <li class="post-list__item">
+      <div class="post-list__content">
+        <div class="post-list__headline">
+          <a href="{{ term.permalink }}">{{ term.name }}</a>
+        </div>
+        <div class="post-list__description">{{ term.pages | length }} post{{ term.pages | length | pluralize }}</div>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+
+</div>
+{% endblock content %}

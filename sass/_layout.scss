@@ -1,0 +1,180 @@
+// ============================================================
+// Layout — header, navigation, footer, wrappers
+// ============================================================
+
+.site-wrapper {
+  max-width: $wide-width;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.content-wrapper {
+  max-width: $content-width;
+  margin: 0 auto;
+}
+
+
+// --- Header --------------------------------------------------
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--header-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid $border;
+  margin-bottom: 48px;
+}
+
+.site-header__inner {
+  max-width: $wide-width;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.site-wordmark {
+  font-family: $serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: $text-primary;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+}
+
+// Hamburger — hidden on desktop
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: $text-primary;
+  cursor: pointer;
+  padding: 8px;
+  margin: -8px;
+  line-height: 0;
+}
+
+.menu-toggle__icon--close {
+  display: none;
+}
+
+.site-nav {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex: 1;
+}
+
+.site-nav a {
+  font-family: $sans;
+  font-size: 14px;
+  font-weight: 400;
+  color: $text-secondary;
+  text-decoration: none;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  transition: color $transition-fast, background-color $transition-fast;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: $accent;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform $transition-slow;
+  }
+
+  &:hover {
+    color: $text-primary;
+    background-color: var(--nav-hover-bg);
+  }
+
+  &:hover::before {
+    transform: scaleX(1);
+  }
+}
+
+.site-nav__subscribe {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+
+// --- Mobile nav ----------------------------------------------
+
+@media (max-width: $mobile-break) {
+  .menu-toggle {
+    display: flex;
+    align-items: center;
+  }
+
+  .site-nav {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: $bg;
+    border-bottom: 1px solid $border;
+    padding: 8px 24px 16px;
+    box-shadow: var(--nav-shadow);
+  }
+
+  .site-nav.is-open {
+    display: flex;
+  }
+
+  .menu-toggle[aria-expanded="true"] {
+    .menu-toggle__icon--open  { display: none; }
+    .menu-toggle__icon--close { display: block; }
+  }
+
+  .site-nav a {
+    padding: 10px 16px;
+    font-size: 15px;
+  }
+
+  .site-nav__subscribe {
+    margin-left: 0;
+  }
+
+  .site-header__inner {
+    position: relative;
+  }
+}
+
+
+// --- Footer --------------------------------------------------
+
+.site-footer {
+  margin-top: 64px;
+  padding: 24px 0 32px;
+  border-top: 1px solid $border;
+  text-align: center;
+  font-family: $sans;
+  font-size: 11px;
+  color: $text-tertiary;
+}

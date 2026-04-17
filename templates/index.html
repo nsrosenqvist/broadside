@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-wrapper">
+
+{% set all_pages = paginator.pages %}
+{% set page_count = all_pages | length %}
+
+{# --- Tier 1: Featured post (first post) --- #}
+{% if page_count >= 1 %}
+  {% set post = all_pages | first %}
+  <article class="featured-post">
+    {% if post.extra.image is defined %}
+    <a href="{{ post.permalink }}" class="featured-post__image-wrap">
+      <img src="{{ post.permalink ~ post.extra.image }}" alt="{{ post.title }}" class="featured-post__image">
+    </a>
+    {% endif %}
+
+    {% if post.taxonomies.categories is defined %}
+    <div class="featured-post__category">
+      {% for cat in post.taxonomies.categories %}
+        <a href="{{ get_taxonomy_url(kind='categories', name=cat) }}" class="category-label">{{ cat }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <h2 class="featured-post__headline">
+      <a href="{{ post.permalink }}">{{ post.title }}</a>
+    </h2>
+
+    {% if post.extra.subtitle is defined %}
+    <p class="featured-post__subtitle">{{ post.extra.subtitle }}</p>
+    {% elif post.description %}
+    <p class="featured-post__subtitle">{{ post.description }}</p>
+    {% endif %}
+
+    <div class="featured-post__meta meta">
+      <time datetime="{{ post.date }}">{{ post.date | date(format="%B %-d, %Y") }}</time>
+      {% if post.reading_time %}
+        <span class="meta-separator">&middot;</span>
+        {{ post.reading_time }} min read
+      {% endif %}
+    </div>
+  </article>
+{% endif %}
+
+{# --- Tier 2: Two-column grid (posts 2 & 3) --- #}
+{% if page_count >= 2 %}
+  <div class="post-grid">
+    {% for post in all_pages | slice(start=1, end=3) %}
+    <article class="post-card">
+      {% if post.extra.image is defined %}
+      <a href="{{ post.permalink }}" class="post-card__image-wrap">
+        <img src="{{ post.permalink ~ post.extra.image }}" alt="{{ post.title }}" class="post-card__image">
+      </a>
+      {% endif %}
+
+      {% if post.taxonomies.categories is defined %}
+      <div class="post-card__category">
+        {% for cat in post.taxonomies.categories %}
+          <a href="{{ get_taxonomy_url(kind='categories', name=cat) }}" class="category-label">{{ cat }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <h3 class="post-card__headline">
+        <a href="{{ post.permalink }}">{{ post.title }}</a>
+      </h3>
+
+      {% if post.extra.subtitle is defined %}
+      <p class="post-card__subtitle">{{ post.extra.subtitle }}</p>
+      {% elif post.description %}
+      <p class="post-card__subtitle">{{ post.description }}</p>
+      {% endif %}
+
+      <div class="meta">
+        <time datetime="{{ post.date }}">{{ post.date | date(format="%B %-d, %Y") }}</time>
+        {% if post.reading_time %}
+          <span class="meta-separator">&middot;</span>
+          {{ post.reading_time }} min read
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+{% endif %}
+
+{# --- Tier 3: Text-only list (remaining posts) --- #}
+{% if page_count > 3 %}
+  <ul class="post-list">
+    {% for post in all_pages | slice(start=3) %}
+    <li class="post-list__item">
+      {% if post.taxonomies.categories is defined %}
+      <div class="post-list__category">
+        {% for cat in post.taxonomies.categories %}
+          <a href="{{ get_taxonomy_url(kind='categories', name=cat) }}" class="category-label">{{ cat }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="post-list__content">
+        <div class="post-list__headline">
+          <a href="{{ post.permalink }}">{{ post.title }}</a>
+        </div>
+        {% if post.description %}
+        <div class="post-list__description">{{ post.description }}</div>
+        {% endif %}
+      </div>
+
+      <time class="post-list__date" datetime="{{ post.date }}">{{ post.date | date(format="%b %-d") }}</time>
+    </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+{# --- Pagination --- #}
+{% if paginator.next %}
+  <div class="pagination">
+    <a href="{{ paginator.next }}">Older posts <span class="pagination__arrow">&rarr;</span></a>
+  </div>
+{% endif %}
+
+</div>
+{% endblock content %}

@@ -1,0 +1,97 @@
+// ============================================================
+// Syntax highlighting (requires highlight_theme = "css")
+// ============================================================
+
+:root {
+  --syn-base:      #3d3d3d;
+  --syn-comment:   #a0a0a0;
+  --syn-keyword:   #8b0000;
+  --syn-string:    #4a6b3a;
+  --syn-number:    #6b4a8b;
+  --syn-function:  #2a5a8b;
+  --syn-type:      #8b5a2a;
+  --syn-punct:     #5a5a5a;
+  --syn-operator:  #5a5a5a;
+  --syn-variable:  #3d3d3d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --syn-base:      #d4d4d4;
+    --syn-comment:   #6a6a6a;
+    --syn-keyword:   #d4605a;
+    --syn-string:    #87c07a;
+    --syn-number:    #c0a0e0;
+    --syn-function:  #6db3e8;
+    --syn-type:      #e0a860;
+    --syn-punct:     #a0a0a0;
+    --syn-operator:  #a0a0a0;
+    --syn-variable:  #d4d4d4;
+  }
+}
+
+pre .z-comment {
+  color: var(--syn-comment);
+  font-style: italic;
+}
+
+pre .z-keyword,
+pre .z-storage {
+  color: var(--syn-keyword);
+}
+
+pre .z-string {
+  color: var(--syn-string);
+}
+
+pre .z-constant,
+pre .z-constant.z-numeric {
+  color: var(--syn-number);
+}
+
+pre .z-entity.z-name.z-function,
+pre .z-support.z-function {
+  color: var(--syn-function);
+}
+
+pre .z-entity.z-name.z-type,
+pre .z-support.z-type,
+pre .z-storage.z-type {
+  color: var(--syn-type);
+}
+
+pre .z-variable.z-parameter,
+pre .z-variable.z-other {
+  color: var(--syn-variable);
+}
+
+pre .z-keyword.z-operator,
+pre .z-punctuation {
+  color: var(--syn-operator);
+}
+
+pre .z-meta.z-generic,
+pre .z-variable.z-function {
+  color: var(--syn-function);
+}
+
+// HTML / markup
+pre .z-entity.z-name.z-tag,
+pre .z-punctuation.z-definition.z-tag {
+  color: var(--syn-keyword);
+}
+
+pre .z-entity.z-other.z-attribute-name {
+  color: var(--syn-type);
+}
+
+// CSS
+pre .z-support.z-constant.z-property-value,
+pre .z-constant.z-other.z-color {
+  color: var(--syn-number);
+}
+
+pre .z-entity.z-name.z-tag.z-css,
+pre .z-entity.z-other.z-pseudo-class {
+  color: var(--syn-function);
+}

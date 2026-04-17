@@ -1,0 +1,81 @@
+// ============================================================
+// Shared components — category labels, metadata, pagination
+// ============================================================
+
+.category-label {
+  font-family: $sans;
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: $accent;
+  text-decoration: none;
+  transition: color $transition-fast;
+  position: relative;
+  display: inline-block;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: $accent;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform $transition-slow;
+  }
+
+  &:hover {
+    color: $text-primary;
+  }
+
+  &:hover::before {
+    transform: scaleX(1);
+  }
+}
+
+
+// --- Metadata line -------------------------------------------
+
+.meta {
+  font-family: $sans;
+  font-size: 13px;
+  font-weight: 400;
+  color: $text-secondary;
+}
+
+.meta-separator {
+  margin: 0 6px;
+}
+
+
+// --- Pagination ----------------------------------------------
+
+.pagination {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 24px;
+}
+
+.pagination a {
+  font-family: $sans;
+  font-size: 13px;
+  color: $text-secondary;
+  text-decoration: none;
+  transition: color $transition-base;
+
+  &:hover {
+    color: $text-primary;
+
+    .pagination__arrow {
+      transform: translateX(2px);
+    }
+  }
+}
+
+.pagination__arrow {
+  display: inline-block;
+  transition: transform $transition-base;
+}

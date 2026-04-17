@@ -1,0 +1,253 @@
+// ============================================================
+// Index page — featured post, post grid, post list
+// ============================================================
+
+// --- Tier 1: Featured ----------------------------------------
+
+.featured-post {
+  margin-bottom: 48px;
+  padding: 16px;
+  margin-left: -16px;
+  margin-right: -16px;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    height: 2px;
+    background-color: $accent;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform $transition-slow;
+  }
+
+  &:hover::before {
+    transform: scaleX(1);
+  }
+}
+
+.featured-post__image-wrap {
+  margin-bottom: 20px;
+}
+
+.featured-post__image {
+  width: 100%;
+  display: block;
+}
+
+.featured-post__category {
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.featured-post__headline {
+  font-family: $serif;
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1.25;
+  color: $text-primary;
+  margin-bottom: 8px;
+  transition: color $transition-base;
+}
+
+.featured-post__headline a {
+  color: inherit;
+  text-decoration: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+}
+
+.featured-post:hover .featured-post__headline {
+  color: $accent;
+}
+
+.featured-post__subtitle {
+  font-family: $body-serif;
+  font-size: 15px;
+  font-style: italic;
+  color: $text-secondary;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.featured-post__meta {
+  margin-top: 4px;
+}
+
+
+// --- Tier 2: Two-column grid ---------------------------------
+
+.post-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 48px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid $border;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.post-card {
+  display: block;
+  padding: 12px;
+  margin-left: -12px;
+  margin-right: -12px;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 12px;
+    right: 12px;
+    height: 2px;
+    background-color: $accent;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform $transition-slow;
+  }
+
+  &:hover::before {
+    transform: scaleX(1);
+  }
+}
+
+.post-card__image-wrap {
+  margin-bottom: 14px;
+}
+
+.post-card__image {
+  width: 100%;
+  display: block;
+}
+
+.post-card__category {
+  margin-bottom: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+.post-card__headline {
+  font-family: $serif;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: $text-primary;
+  margin-bottom: 6px;
+  transition: color $transition-base;
+}
+
+.post-card__headline a {
+  color: inherit;
+  text-decoration: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+}
+
+.post-card:hover .post-card__headline {
+  color: $accent;
+}
+
+.post-card__subtitle {
+  font-family: $body-serif;
+  font-size: 14px;
+  font-style: italic;
+  color: $text-secondary;
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+
+// --- Tier 3: Text-only list ----------------------------------
+
+.post-list {
+  list-style: none;
+  padding: 0;
+}
+
+.post-list__item {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 0.5px solid $border;
+  flex-wrap: wrap;
+  position: relative;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+.post-list__category {
+  flex-shrink: 0;
+  width: 100px;
+  position: relative;
+  z-index: 1;
+}
+
+.post-list__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.post-list__headline {
+  font-family: $serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: $text-primary;
+  transition: color $transition-base;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+    }
+  }
+
+  &:hover {
+    color: $accent;
+  }
+}
+
+.post-list__description {
+  font-family: $body-serif;
+  font-size: 14px;
+  color: $text-secondary;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.post-list__date {
+  flex-shrink: 0;
+  font-family: $sans;
+  font-size: 11px;
+  color: $text-tertiary;
+  white-space: nowrap;
+}

@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} — {{ config.title }}{% endblock title %}
+{% block description %}{{ page.description | default(value='') }}{% endblock description %}
+
+{% block opengraph %}
+{% set og_image = false %}
+{% if page.extra.og_image is defined %}
+  {% set og_image = page.permalink ~ page.extra.og_image %}
+{% elif page.extra.image is defined %}
+  {% set og_image = page.permalink ~ page.extra.image %}
+{% elif config.extra.default_og_image is defined %}
+  {% set og_image = get_url(path=config.extra.default_og_image) %}
+{% endif %}
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ page.title }}">
+<meta property="og:description" content="{{ page.description | default(value='') }}">
+<meta property="og:url" content="{{ page.permalink }}">
+{% if og_image %}
+<meta property="og:image" content="{{ og_image }}">
+{% endif %}
+{% if page.date %}
+<meta property="article:published_time" content="{{ page.date }}">
+{% endif %}
+{% if page.updated %}
+<meta property="article:modified_time" content="{{ page.updated }}">
+{% endif %}
+{% if page.extra.author is defined %}
+<meta property="article:author" content="{{ page.extra.author }}">
+{% elif config.extra.author is defined %}
+<meta property="article:author" content="{{ config.extra.author }}">
+{% endif %}
+{% endblock opengraph %}
+
+{% block twitter_card %}
+<meta name="twitter:card" content="{% if og_image %}summary_large_image{% else %}summary{% endif %}">
+<meta name="twitter:title" content="{{ page.title }}">
+<meta name="twitter:description" content="{{ page.description | default(value='') }}">
+{% if og_image %}
+<meta name="twitter:image" content="{{ og_image }}">
+{% endif %}
+{% endblock twitter_card %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ page.title | safe }}",
+  "url": "{{ page.permalink | safe }}",
+  {% if page.description %}"description": "{{ page.description | safe }}",{% endif %}
+  {% if og_image %}"image": "{{ og_image | safe }}",{% endif %}
+  {% if page.date %}"datePublished": "{{ page.date }}",{% endif %}
+  {% if page.updated %}"dateModified": "{{ page.updated }}",{% endif %}
+  {% if page.word_count %}"wordCount": {{ page.word_count }},{% endif %}
+  {% if page.taxonomies.categories is defined %}"articleSection": "{{ page.taxonomies.categories | first }}",
+  "keywords": [{% for cat in page.taxonomies.categories %}"{{ cat | safe }}"{% if not loop.last %}, {% endif %}{% endfor %}],{% endif %}
+  "author": {
+    "@type": "Person",
+    "name": "{% if page.extra.author is defined %}{{ page.extra.author | safe }}{% elif config.extra.author is defined %}{{ config.extra.author | safe }}{% endif %}"{% if config.extra.author_url is defined %},
+    "url": "{{ config.extra.author_url | safe }}"{% endif %}
+
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{ config.title | safe }}"{% if config.extra.publisher_logo is defined %},
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ get_url(path=config.extra.publisher_logo) | safe }}"
+    }{% endif %}
+
+  }
+}
+</script>
+{% endblock jsonld %}
+
+{% block content %}
+<article class="content-wrapper">
+
+  {# --- Article header --- #}
+  <header class="article-header">
+    {% if page.taxonomies.categories is defined %}
+    <div class="article-header__category">
+      {% for cat in page.taxonomies.categories %}
+        <a href="{{ get_taxonomy_url(kind='categories', name=cat) }}" class="category-label">{{ cat }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <h1 class="article-header__headline">{{ page.title }}</h1>
+
+    {% if page.extra.subtitle is defined %}
+    <p class="article-header__subtitle">{{ page.extra.subtitle }}</p>
+    {% elif page.description %}
+    <p class="article-header__subtitle">{{ page.description }}</p>
+    {% endif %}
+
+    <div class="article-header__meta meta">
+      {% if page.extra.author is defined %}
+        {{ page.extra.author }}
+        <span class="meta-separator">&middot;</span>
+      {% elif config.extra.author is defined %}
+        {{ config.extra.author }}
+        <span class="meta-separator">&middot;</span>
+      {% endif %}
+      <time datetime="{{ page.date }}">{{ page.date | date(format="%B %-d, %Y") }}</time>
+      {% if page.reading_time %}
+        <span class="meta-separator">&middot;</span>
+        {{ page.reading_time }} min read
+      {% endif %}
+    </div>
+  </header>
+
+  {# --- Featured image --- #}
+  {% if page.extra.image is defined %}
+  <figure class="article-featured-image">
+    <img src="{{ page.permalink ~ page.extra.image }}" alt="{{ page.title }}">
+    {% if page.extra.image_caption is defined %}
+    <figcaption class="article-featured-image__caption">{{ page.extra.image_caption }}</figcaption>
+    {% endif %}
+  </figure>
+  {% endif %}
+
+  {# --- Article body --- #}
+  <div class="article-body">
+    {{ page.content | safe }}
+  </div>
+
+  {# --- Previous / Next navigation --- #}
+  {% if page.lower or page.higher %}
+  <nav class="post-nav">
+    {% if page.higher %}
+    <a href="{{ page.higher.permalink }}" class="post-nav__item post-nav__item--prev">
+      <div class="post-nav__label">Previous</div>
+      <div class="post-nav__title">{{ page.higher.title }}</div>
+    </a>
+    {% else %}
+    <div></div>
+    {% endif %}
+
+    {% if page.lower %}
+    <a href="{{ page.lower.permalink }}" class="post-nav__item post-nav__item--next">
+      <div class="post-nav__label">Next</div>
+      <div class="post-nav__title">{{ page.lower.title }}</div>
+    </a>
+    {% else %}
+    <div></div>
+    {% endif %}
+  </nav>
+  {% endif %}
+
+</article>
+{% endblock content %}

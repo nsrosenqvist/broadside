@@ -1,0 +1,5 @@
+# Exclude dev-only files from release archives (git archive / GitHub Releases)
+AGENTS.md       export-ignore
+dev.sh          export-ignore
+config.toml     export-ignore
+content/        export-ignore

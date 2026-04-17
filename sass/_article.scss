@@ -1,0 +1,339 @@
+// ============================================================
+// Article — header, featured image, body, prev/next nav
+// ============================================================
+
+.article-header {
+  margin-bottom: 32px;
+}
+
+.article-header__category {
+  margin-bottom: 10px;
+}
+
+.article-header__headline {
+  font-family: $serif;
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: $text-primary;
+  margin-bottom: 10px;
+}
+
+.article-header__subtitle {
+  font-family: $body-serif;
+  font-size: 18px;
+  font-style: italic;
+  color: $text-secondary;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.article-header__meta {
+  padding-bottom: 20px;
+  border-bottom: 1px solid $border;
+}
+
+
+// --- Featured image ------------------------------------------
+
+.article-featured-image {
+  margin-bottom: 32px;
+}
+
+.article-featured-image img {
+  width: 100%;
+}
+
+.article-featured-image__caption {
+  font-family: $sans;
+  font-size: 12px;
+  color: $text-tertiary;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+
+// --- Article body --------------------------------------------
+
+.article-body {
+  // Drop cap
+  > p:first-of-type::first-letter {
+    font-family: $serif;
+    font-size: 3.6em;
+    font-weight: 500;
+    float: left;
+    line-height: 0.65;
+    margin-right: 6px;
+    margin-top: 5px;
+    padding-top: 2px;
+    color: $text-primary;
+  }
+
+  p {
+    margin-bottom: 1.25em;
+  }
+
+  // Links
+  a {
+    color: $accent;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 2px;
+    transition: text-decoration-color $transition-base;
+
+    &:hover {
+      text-decoration-color: $accent;
+    }
+  }
+
+  // Headings
+  h2 {
+    font-family: $serif;
+    font-size: 22px;
+    font-weight: 500;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    color: $text-primary;
+  }
+
+  h3 {
+    font-family: $serif;
+    font-size: 18px;
+    font-weight: 500;
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+    color: $text-primary;
+  }
+
+  h4, h5, h6 {
+    font-family: $sans;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  // Block quotes / pull quotes
+  blockquote {
+    border-left: 2px solid $accent;
+    margin: 1.5em 0;
+    padding: 0.25em 0 0.25em 1.5em;
+    font-family: $body-serif;
+    font-style: italic;
+    font-size: 20px;
+    line-height: 1.5;
+    color: $text-primary;
+
+    p {
+      margin-bottom: 0.5em;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    cite, footer {
+      display: block;
+      font-family: $sans;
+      font-size: 12px;
+      font-style: normal;
+      color: $text-secondary;
+      margin-top: 8px;
+    }
+  }
+
+  // Code
+  pre {
+    background: $code-bg;
+    color: var(--syn-base);
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin-bottom: 1.25em;
+    font-family: $mono;
+    font-size: 14px;
+    line-height: 1.6;
+
+    code {
+      background: none;
+      padding: 0;
+      font-size: inherit;
+      color: inherit;
+    }
+  }
+
+  code {
+    font-family: $mono;
+    font-size: 14px;
+    background: $code-bg;
+    padding: 2px 5px;
+  }
+
+  // Lists
+  ul, ol {
+    margin-bottom: 1.25em;
+
+    li {
+      margin-bottom: 0.25em;
+    }
+  }
+
+  // Horizontal rule
+  hr {
+    border: none;
+    border-top: 1px solid $border;
+    margin: 2rem 0;
+  }
+
+  // Images
+  img {
+    width: 100%;
+    margin: 1.5em 0;
+  }
+
+  // Tables
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.25em;
+    font-size: 14px;
+
+    th, td {
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1px solid $border;
+    }
+
+    th {
+      font-family: $sans;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: $text-secondary;
+    }
+  }
+
+  // Footnote references (superscript in body)
+  .footnote-reference {
+    font-family: $sans;
+    font-size: 0.75em;
+    vertical-align: super;
+    line-height: 0;
+
+    a {
+      color: $accent;
+      text-decoration: none;
+      transition: color $transition-fast;
+
+      &:hover {
+        color: $text-primary;
+      }
+    }
+  }
+
+  // Footnote definitions (list at bottom)
+  .footnote-definition {
+    font-family: $sans;
+    font-size: 13px;
+    color: $text-secondary;
+    line-height: 1.5;
+    margin-top: 0;
+    display: flex;
+    gap: 8px;
+
+    &:first-of-type {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid $border;
+    }
+
+    .footnote-definition-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: $accent;
+      flex-shrink: 0;
+      min-width: 16px;
+    }
+
+    p {
+      margin-bottom: 0.35em;
+    }
+
+    a {
+      color: $accent;
+      text-decoration: underline;
+      text-decoration-color: transparent;
+      text-underline-offset: 2px;
+      transition: text-decoration-color $transition-base;
+
+      &:hover {
+        text-decoration-color: $accent;
+      }
+    }
+  }
+}
+
+
+// --- Prev / Next navigation ----------------------------------
+
+.post-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: 32px;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid $border;
+}
+
+.post-nav__item {
+  text-decoration: none;
+  display: block;
+  padding: 16px;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    height: 2px;
+    background-color: $accent;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform $transition-slow;
+  }
+
+  &:hover::before {
+    transform: scaleX(1);
+  }
+}
+
+.post-nav__item--next {
+  text-align: right;
+}
+
+.post-nav__label {
+  font-family: $sans;
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: $text-tertiary;
+  margin-bottom: 4px;
+}
+
+.post-nav__title {
+  font-family: $serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: $text-secondary;
+  transition: color $transition-base;
+
+  .post-nav__item:hover & {
+    color: $accent;
+  }
+}

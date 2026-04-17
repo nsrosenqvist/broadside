@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ config.title }}{% endblock title %}</title>
+  <meta name="description" content="{% block description %}{{ config.description | default(value='') }}{% endblock description %}">
+
+  {# --- OpenGraph --- #}
+  <meta property="og:site_name" content="{{ config.title }}">
+  {% block opengraph %}
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ config.title }}">
+  <meta property="og:description" content="{{ config.description | default(value='') }}">
+  <meta property="og:url" content="{{ config.base_url }}">
+  {% if config.extra.default_og_image is defined %}
+  <meta property="og:image" content="{{ get_url(path=config.extra.default_og_image) }}">
+  {% endif %}
+  {% endblock opengraph %}
+
+  {# --- Twitter Card --- #}
+  {% block twitter_card %}
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="{{ config.title }}">
+  <meta name="twitter:description" content="{{ config.description | default(value='') }}">
+  {% if config.extra.default_og_image is defined %}
+  <meta name="twitter:image" content="{{ get_url(path=config.extra.default_og_image) }}">
+  {% endif %}
+  {% endblock twitter_card %}
+  {% if config.extra.twitter_handle is defined %}
+  <meta name="twitter:site" content="{{ config.extra.twitter_handle }}">
+  {% endif %}
+
+  {# --- Social verification (rel=me) --- #}
+  {% if config.extra.verification_links is defined %}
+  {% for link in config.extra.verification_links %}
+  <link rel="me" href="{{ link }}">
+  {% endfor %}
+  {% endif %}
+
+  <link rel="preconnect" href="https://fonts.bunny.net">
+  <link href="https://fonts.bunny.net/css2?family=Inter:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Source+Serif+4:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ get_url(path='style.css') }}">
+  {% if config.generate_feeds %}
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="{{ get_url(path='rss.xml') }}">
+  {% endif %}
+  {# --- Schema.org JSON-LD --- #}
+  {% block jsonld %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "{{ config.title | safe }}",
+    "url": "{{ config.base_url | safe }}",
+    "description": "{{ config.description | default(value='') | safe }}"{% if config.extra.publisher_logo is defined %},
+    "publisher": {
+      "@type": "Organization",
+      "name": "{{ config.title | safe }}",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{ get_url(path=config.extra.publisher_logo) | safe }}"
+      }
+    }{% endif %}
+
+  }
+  </script>
+  {% endblock jsonld %}
+  {% block head_extra %}{% endblock head_extra %}
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a href="{{ config.base_url }}" class="site-wordmark">{{ config.title }}</a>
+
+      <button class="menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+        <svg class="menu-toggle__icon menu-toggle__icon--open" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/></svg>
+        <svg class="menu-toggle__icon menu-toggle__icon--close" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="4" y1="4" x2="16" y2="16"/><line x1="16" y1="4" x2="4" y2="16"/></svg>
+      </button>
+
+      <nav class="site-nav" id="site-nav">
+        {% if config.extra.nav_links is defined %}
+          {% for link in config.extra.nav_links %}
+            <a href="{{ link.url }}">{{ link.name }}</a>
+          {% endfor %}
+        {% endif %}
+        {% if config.generate_feeds %}
+        <a href="{{ get_url(path='rss.xml') }}" class="site-nav__subscribe">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1" fill="currentColor" stroke="none"/></svg>
+          <span>Subscribe</span>
+        </a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <div class="site-wrapper">
+    <main>
+      {% block content %}{% endblock content %}
+    </main>
+
+    <footer class="site-footer">
+      &copy; {{ now() | date(format="%Y") }} {{ config.title }}
+    </footer>
+  </div>
+  <script>
+    (function () {
+      var toggle = document.querySelector('.menu-toggle');
+      var nav = document.getElementById('site-nav');
+      if (!toggle || !nav) return;
+      toggle.addEventListener('click', function () {
+        var open = nav.classList.toggle('is-open');
+        toggle.setAttribute('aria-expanded', String(open));
+      });
+    })();
+  </script>
+</body>
+</html>

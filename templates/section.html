@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}{{ section.title | default(value='Posts') }} — {{ config.title }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+
+  <header class="section-header">
+    <h1 class="section-header__title">{{ section.title | default(value='Posts') }}</h1>
+  </header>
+
+  {% if section.pages | length > 0 %}
+  <ul class="post-list">
+    {% for post in section.pages %}
+    <li class="post-list__item">
+      {% if post.taxonomies.categories is defined %}
+      <div class="post-list__category">
+        {% for cat in post.taxonomies.categories %}
+          <a href="{{ get_taxonomy_url(kind='categories', name=cat) }}" class="category-label">{{ cat }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="post-list__content">
+        <div class="post-list__headline">
+          <a href="{{ post.permalink }}">{{ post.title }}</a>
+        </div>
+        {% if post.description %}
+        <div class="post-list__description">{{ post.description }}</div>
+        {% endif %}
+      </div>
+
+      <time class="post-list__date" datetime="{{ post.date }}">{{ post.date | date(format="%b %-d") }}</time>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="meta" style="margin-top: 16px;">No posts yet.</p>
+  {% endif %}
+
+</div>
+{% endblock content %}

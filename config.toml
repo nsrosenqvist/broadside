@@ -1,0 +1,30 @@
+base_url = "http://127.0.0.1:1111"
+title = "Broadside"
+description = "A blog about software, security, and the craft of building things"
+theme = "broadside"
+compile_sass = true
+generate_feeds = true
+feed_filenames = ["rss.xml"]
+
+[markdown]
+highlight_code = true
+highlight_theme = "css"
+
+[[taxonomies]]
+name = "categories"
+
+[extra]
+author = "Elena Larsson"
+# author_url = "https://example.com/about"
+# default_og_image = "og-default.png"
+# publisher_logo = "logo.png"
+# twitter_handle = "@broadside"
+# verification_links = [
+#   "https://mastodon.social/@example",
+#   "https://github.com/example",
+# ]
+nav_links = [
+  { name = "Essays", url = "/essays" },
+  { name = "Notes", url = "/notes" },
+  { name = "About", url = "/about" },
+]
