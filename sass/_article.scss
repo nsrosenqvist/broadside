@@ -293,23 +293,6 @@
   display: block;
   padding: 16px;
   position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 16px;
-    right: 16px;
-    height: 2px;
-    background-color: $accent;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform $transition-slow;
-  }
-
-  &:hover::before {
-    transform: scaleX(1);
-  }
 }
 
 .post-nav__item--next {

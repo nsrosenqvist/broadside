@@ -68,14 +68,9 @@
 
   &:hover {
     color: $text-primary;
-
-    .pagination__arrow {
-      transform: translateX(2px);
-    }
   }
 }
 
 .pagination__arrow {
   display: inline-block;
-  transition: transform $transition-base;
 }
