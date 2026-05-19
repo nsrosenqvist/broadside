@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  models: read
 
 jobs:
   release:
@@ -28,30 +29,27 @@ jobs:
             echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Build changelog
+      - name: Find previous release tag
+        id: prev
         run: |
-          # Find the previous tag (excluding floating major/minor tags like v0, v0.2)
+          # Exclude floating major/minor tags (v0, v0.2) so we compare against
+          # the prior full-semver release, not a moved alias.
           PREV_TAG=$(git tag --list 'v*.*.*' --sort=-v:refname \
             | grep -v "^${GITHUB_REF_NAME}$" | head -n 1)
+          echo "prev_tag=${PREV_TAG}" >> "$GITHUB_OUTPUT"
 
-          if [ -n "$PREV_TAG" ]; then
-            RANGE="${PREV_TAG}..${GITHUB_REF_NAME}"
-            DIFF_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/compare/${PREV_TAG}...${GITHUB_REF_NAME}"
-          else
-            RANGE="${GITHUB_REF_NAME}"
-            DIFF_URL=""
-          fi
-
-          {
-            echo "## What's Changed"
-            echo ""
-            git log "$RANGE" --pretty=format:"- %s (%h)" --no-merges
-            echo ""
-            if [ -n "$DIFF_URL" ]; then
-              echo ""
-              echo "**Full Changelog**: ${DIFF_URL}"
-            fi
-          } > release_notes.md
+      - name: Generate release notes
+        uses: nsrosenqvist/chronikl@v1
+        with:
+          from: ${{ steps.prev.outputs.prev_tag }}
+          to: ${{ github.ref_name }}
+          output: release_notes.md
+          voice: prose
+          rich_context: 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHRONIKL_PROVIDER: github-models
+          CHRONIKL_MODEL: openai/gpt-4o-mini
 
       - name: Create release
         uses: softprops/action-gh-release@v2
