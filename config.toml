@@ -6,9 +6,14 @@ compile_sass = true
 generate_feeds = true
 feed_filenames = ["rss.xml"]
 
-[markdown]
-highlight_code = true
-highlight_theme = "css"
+# Class-based highlighting (giallo, Zola >= 0.22): the theme ships its own
+# palette in sass/_syntax.scss targeting the emitted .z-* classes, so the
+# giallo-*.css files Zola generates into static/ are unused — don't link or
+# commit them. A theme choice is required by Zola even in class mode.
+[markdown.highlighting]
+style = "class"
+light_theme = "github-light"
+dark_theme = "github-dark"
 
 [[taxonomies]]
 name = "categories"

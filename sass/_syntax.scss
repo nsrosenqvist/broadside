@@ -1,5 +1,8 @@
 // ============================================================
-// Syntax highlighting (requires highlight_theme = "css")
+// Syntax highlighting
+// Requires Zola >= 0.22 with [markdown.highlighting] style = "class"
+// (giallo emits scope-derived .z-* classes, same convention as the
+// old syntect classed output, plus .giallo-l/.giallo-ln structure)
 // ============================================================
 
 :root {
@@ -94,4 +97,23 @@ pre .z-constant.z-other.z-color {
 pre .z-entity.z-name.z-tag.z-css,
 pre .z-entity.z-other.z-pseudo-class {
   color: var(--syn-function);
+}
+
+// Structural classes giallo emits around lines and line numbers
+// (required — see the Zola syntax highlighting docs)
+pre .giallo-l {
+  display: inline-block;
+  min-height: 1lh;
+  width: 100%;
+}
+
+pre .giallo-ln {
+  display: inline-block;
+  user-select: none;
+  margin-right: 0.4em;
+  padding: 0.4em;
+  min-width: 3ch;
+  text-align: right;
+  opacity: 0.8;
+  color: var(--syn-comment);
 }
