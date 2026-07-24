@@ -113,5 +113,68 @@
       });
     })();
   </script>
+  <script>
+    // Add a copy-to-clipboard button to each code block. The button lives in a
+    // wrapper around the <pre> (not inside it), so it stays pinned top-right
+    // and doesn't scroll away with long lines.
+    (function () {
+      var COPY = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+      var DONE = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+
+      function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+
+      var blocks = document.querySelectorAll('.article-body pre');
+      blocks.forEach(function (pre) {
+        var code = pre.querySelector('code');
+        if (!code) return;
+
+        var wrap = document.createElement('div');
+        wrap.className = 'code-block';
+        pre.parentNode.insertBefore(wrap, pre);
+        wrap.appendChild(pre);
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'code-copy';
+        btn.setAttribute('aria-label', 'Copy code');
+        btn.innerHTML = COPY;
+        wrap.appendChild(btn);
+
+        var reset;
+        btn.addEventListener('click', function () {
+          var text = code.innerText;
+          var done = function () {
+            btn.classList.add('is-copied');
+            btn.innerHTML = DONE;
+            btn.setAttribute('aria-label', 'Copied');
+            clearTimeout(reset);
+            reset = setTimeout(function () {
+              btn.classList.remove('is-copied');
+              btn.innerHTML = COPY;
+              btn.setAttribute('aria-label', 'Copy code');
+            }, 2000);
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, function () {
+              fallbackCopy(text);
+              done();
+            });
+          } else {
+            fallbackCopy(text);
+            done();
+          }
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
