@@ -71,31 +71,60 @@
 .post-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 32px;
+  // Two bands — images, then text — that the cards subgrid onto, so headlines
+  // line up across the row however tall each image is, and whether or not a
+  // post has one at all. The image band takes its height from the tallest
+  // image in the row and collapses to nothing when neither card has one, so
+  // an all-text row costs no dead space. The gap between image and text is
+  // the image-wrap's own margin rather than a row-gap, which is why the empty
+  // band leaves no trace.
+  grid-template-rows: auto auto;
+  column-gap: 32px;
+  row-gap: 0;
   margin-bottom: 48px;
   padding-bottom: 48px;
   border-bottom: 1px solid $border;
 
   @media (max-width: 600px) {
     grid-template-columns: 1fr;
+    grid-template-rows: none;
+    row-gap: 32px;
   }
 }
 
 .post-card {
-  display: block;
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 2;
   padding: 12px;
   margin-left: -12px;
   margin-right: -12px;
   position: relative;
+
+  // Single column: nothing to align against, so a reserved image band would
+  // just be a hole above the headline.
+  @media (max-width: 600px) {
+    display: block;
+    grid-row: auto;
+  }
 }
 
 .post-card__image-wrap {
+  grid-row: 1;
   margin-bottom: 14px;
+}
+
+.post-card__content {
+  grid-row: 2;
 }
 
 .post-card__image {
   width: 100%;
   display: block;
+  // A uniform crop so two images in a row are the same height regardless of
+  // their source proportions.
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
 }
 
 .post-card__category {

@@ -53,28 +53,33 @@
       </a>
       {% endif %}
 
-      {% if post.taxonomies.categories is defined %}
-      <div class="post-card__category">
-        <a href="{{ get_taxonomy_url(kind='categories', name=post.taxonomies.categories | first) }}" class="category-label">{{ post.taxonomies.categories | first }}</a>
-      </div>
-      {% endif %}
-
-      <h3 class="post-card__headline">
-        <a href="{{ post.permalink }}">{{ post.title }}</a>
-      </h3>
-
-      {% if post.extra.subtitle is defined %}
-      <p class="post-card__subtitle">{{ post.extra.subtitle }}</p>
-      {% elif post.description %}
-      <p class="post-card__subtitle">{{ post.description }}</p>
-      {% endif %}
-
-      <div class="meta">
-        <time datetime="{{ post.date }}">{{ post.date | date(format="%B %-d, %Y") }}</time>
-        {% if post.reading_time %}
-          <span class="meta-separator">&middot;</span>
-          {{ post.reading_time }} min read
+      {# Wrapper so the text can sit in the grid's second row — see .post-card
+         in _index.scss. Without it, a card that has no image would pull its
+         kicker up into the image band and break the row's alignment. #}
+      <div class="post-card__content">
+        {% if post.taxonomies.categories is defined %}
+        <div class="post-card__category">
+          <a href="{{ get_taxonomy_url(kind='categories', name=post.taxonomies.categories | first) }}" class="category-label">{{ post.taxonomies.categories | first }}</a>
+        </div>
         {% endif %}
+
+        <h3 class="post-card__headline">
+          <a href="{{ post.permalink }}">{{ post.title }}</a>
+        </h3>
+
+        {% if post.extra.subtitle is defined %}
+        <p class="post-card__subtitle">{{ post.extra.subtitle }}</p>
+        {% elif post.description %}
+        <p class="post-card__subtitle">{{ post.description }}</p>
+        {% endif %}
+
+        <div class="meta">
+          <time datetime="{{ post.date }}">{{ post.date | date(format="%B %-d, %Y") }}</time>
+          {% if post.reading_time %}
+            <span class="meta-separator">&middot;</span>
+            {{ post.reading_time }} min read
+          {% endif %}
+        </div>
       </div>
     </article>
     {% endfor %}
