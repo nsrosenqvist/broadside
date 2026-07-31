@@ -12,8 +12,10 @@ A clean, newspaper-inspired Zola theme. Typography-first, restrained, and confid
 - **Responsive** — collapses gracefully to single column on mobile
 - **Automatic dark mode** via `prefers-color-scheme` — follows the user's OS setting
 - **CSS custom properties** for easy color customization
-- **RSS feed** support
-- **Category taxonomy** with section listing pages
+- **RSS feed** support, including optional per-term feeds surfaced through a
+  Subscribe dropdown in the header
+- **Category and tag taxonomies** with listing pages — one primary category
+  per post as the kicker above the headline, tags for everything else
 - **Previous / Next** post navigation
 - **OpenGraph and Schema.org** support for improved SEO and social sharing
 
@@ -52,8 +54,18 @@ style = "class"
 light_theme = "github-light"
 dark_theme = "github-dark"
 
+# `categories` is the primary taxonomy — the first one a post lists becomes
+# the kicker above its headline and its label in every list. `tags` is
+# optional: leave it out and the theme renders nothing for it.
 [[taxonomies]]
 name = "categories"
+# Optional: a feed per term at /categories/<term>/rss.xml. Any taxonomy with
+# feed = true is listed in the header's Subscribe dropdown, so leave it off
+# for taxonomies with many terms (tags) unless you want them all in the menu.
+feed = true
+
+[[taxonomies]]
+name = "tags"
 
 [extra]
 # Default author name shown on posts without a per-post author
@@ -100,6 +112,7 @@ description = "A new generation of tools is reshaping the developer's craft"
 
 [taxonomies]
 categories = ["Technology"]
+tags = ["Tooling", "Craft"]
 
 [extra]
 subtitle = "A new generation of tools is reshaping the developer's craft — not with fanfare, but with careful, deliberate design"
@@ -114,10 +127,11 @@ image_caption = "A developer's workspace, circa 2026. Photograph by M. Strand"
 | `title` | Yes | Post title |
 | `date` | Yes | Publication date |
 | `description` | No | Short description shown in post lists and meta tags |
-| `[taxonomies] categories` | No | Category labels displayed above headlines |
+| `[taxonomies] categories` | No | The first one is the kicker above the headline and the label in post lists; any further ones join the tags below |
+| `[taxonomies] tags` | No | Secondary topics, shown as `#hashtags` below the article header's metadata rule |
 | `[extra] subtitle` | No | Longer subtitle shown on the article page (falls back to `description`) |
 | `[extra] author` | No | Author name (falls back to `config.extra.author`) |
-| `[extra] image` | No | Featured image filename (co-located with the post) |
+| `[extra] image` | No | Featured image filename (co-located with the post). Cropped to 3:2 in the homepage grid; full-bleed at its natural ratio on the article page and as the featured post |
 | `[extra] image_caption` | No | Caption displayed below the featured image |
 | `[extra] og_image` | No | Override the OpenGraph/Twitter image (falls back to `image`, then `default_og_image`) |
 

@@ -52,10 +52,32 @@ All transitions use `ease` timing, 150–300ms range.
 ## Template conventions
 
 - All templates extend `base.html`
+- Feed discovery goes in `base.html`'s `feed_links` block; `taxonomy_single.html`
+  overrides it with `super()` to add the term's own feed. The
+  `config.generate_feeds` guard must stay *inside* that block — Tera cannot
+  resolve `super()` for a block nested in control flow
+- The header's Subscribe control is a `<details>` dropdown listing every term
+  of every taxonomy with `feed = true`, and falls back to a plain link to the
+  site feed when no taxonomy has one. It is a `<summary>` rather than scripted
+  markup so it opens, closes and takes keyboard focus with JS off; the script
+  in `base.html` only adds click-away and Escape
 - `base.html` generates OpenGraph, Twitter Card, and Schema.org JSON-LD metadata
 - Posts use `page.lower` / `page.higher` for prev/next navigation (not `page.earlier`/`page.later`)
 - Taxonomy URLs use `get_taxonomy_url(kind='categories', name=cat)`
-- Featured images are co-located with posts (`extra.image` in frontmatter)
+- Two taxonomies, with a deliberate hierarchy: `categories` is primary — only
+  its **first** entry is rendered as the kicker above a headline and as the
+  label in post lists, so a post's top line reads the same whether it has one
+  category or four. Any further categories join `tags` in the article
+  header's topics row, below the metadata rule, styled as lowercase
+  `#hashtags` (`.topic-label`) rather than as kickers. `tags` is optional;
+  guard it with `page.taxonomies.tags | default(value=[])` so sites that
+  don't declare the taxonomy never reach `get_taxonomy_url(kind='tags')`
+- Featured images are co-located with posts (`extra.image` in frontmatter).
+  In the homepage two-column grid they are cropped to 3:2 (`object-fit:
+  cover`) so a row's images are always the same height, and the cards
+  subgrid onto a shared image band so headlines align even when only one
+  post in the row has an image. That band is why the card's text lives in
+  a `.post-card__content` wrapper — don't unwrap it
 - The `extra.subtitle` field falls back to `page.description`
 - Author falls back from `page.extra.author` → `config.extra.author`
 - Syntax highlighting requires `highlight_theme = "css"` in `config.toml` so that dark mode token colors work
