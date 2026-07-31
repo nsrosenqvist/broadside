@@ -4,7 +4,8 @@ date = 2026-04-10
 description = "Why a single static binary might be the most radical act of software security"
 
 [taxonomies]
-categories = ["Security"]
+categories = ["Security", "Engineering"]
+tags = ["Rust"]
 
 [extra]
 subtitle = "Why a single static binary might be the most radical act of software security"

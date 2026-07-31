@@ -4,6 +4,13 @@
 
 .article-header {
   margin-bottom: 32px;
+
+  // The topics row already adds height below the rule; claw some of the
+  // header's bottom margin back so the gap before the body reads the same
+  // as it does on a post without one.
+  &:has(.article-header__topics) {
+    margin-bottom: 22px;
+  }
 }
 
 .article-header__category {
@@ -31,6 +38,26 @@
 .article-header__meta {
   padding-bottom: 20px;
   border-bottom: 1px solid $border;
+
+  // With a topics row below it, the rule becomes a divider between two lines
+  // rather than the header's closing edge, so it sits tight to both. The 6px
+  // is optical: this line's half-leading already contributes ~5px, matching
+  // the 10px the row below sets.
+  .article-header:has(.article-header__topics) & {
+    padding-bottom: 6px;
+  }
+}
+
+// Topics — extra categories and tags, below the metadata rule. The font-size
+// and color here are for the separators between labels, which would otherwise
+// inherit body copy's size and primary color and out-shout the labels they sit
+// between. Line-height only has to clear a wrapped second row.
+.article-header__topics {
+  padding-top: 10px;
+  font-family: $sans;
+  font-size: 13px;
+  color: $text-tertiary;
+  line-height: 1.5;
 }
 
 

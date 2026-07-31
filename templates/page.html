@@ -42,6 +42,8 @@
 {% endblock twitter_card %}
 
 {% block jsonld %}
+{# Keywords span both taxonomies; articleSection is the primary category. #}
+{% set keywords = page.taxonomies.categories | default(value=[]) | concat(with=page.taxonomies.tags | default(value=[])) %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -53,8 +55,8 @@
   {% if page.date %}"datePublished": "{{ page.date }}",{% endif %}
   {% if page.updated %}"dateModified": "{{ page.updated }}",{% endif %}
   {% if page.word_count %}"wordCount": {{ page.word_count }},{% endif %}
-  {% if page.taxonomies.categories is defined %}"articleSection": "{{ page.taxonomies.categories | first }}",
-  "keywords": [{% for cat in page.taxonomies.categories %}"{{ cat | safe }}"{% if not loop.last %}, {% endif %}{% endfor %}],{% endif %}
+  {% if page.taxonomies.categories is defined %}"articleSection": "{{ page.taxonomies.categories | first }}",{% endif %}
+  {% if keywords | length > 0 %}"keywords": [{% for kw in keywords %}"{{ kw | safe }}"{% if not loop.last %}, {% endif %}{% endfor %}],{% endif %}
   "author": {
     "@type": "Person",
     "name": "{% if page.extra.author is defined %}{{ page.extra.author | safe }}{% elif config.extra.author is defined %}{{ config.extra.author | safe }}{% endif %}"{% if config.extra.author_url is defined %},
@@ -78,12 +80,22 @@
 <article class="content-wrapper">
 
   {# --- Article header --- #}
+  {#
+    The kicker above the headline is the *primary* category only — the first
+    one listed. Any further categories join the tags in the "Filed under" row
+    below the metadata rule, so the top of the page stays as clean with three
+    labels as it is with one.
+  #}
+  {% set extra_categories = [] %}
+  {% if page.taxonomies.categories is defined and page.taxonomies.categories | length > 1 %}
+    {% set extra_categories = page.taxonomies.categories | slice(start=1) %}
+  {% endif %}
+  {% set tags = page.taxonomies.tags | default(value=[]) %}
+
   <header class="article-header">
     {% if page.taxonomies.categories is defined %}
     <div class="article-header__category">
-      {% for cat in page.taxonomies.categories %}
-        <a href="{{ get_taxonomy_url(kind='categories', name=cat) }}" class="category-label">{{ cat }}</a>
-      {% endfor %}
+      <a href="{{ get_taxonomy_url(kind='categories', name=page.taxonomies.categories | first) }}" class="category-label">{{ page.taxonomies.categories | first }}</a>
     </div>
     {% endif %}
 
@@ -109,6 +121,19 @@
         {{ page.reading_time }} min read
       {% endif %}
     </div>
+
+    {% if extra_categories | length > 0 or tags | length > 0 %}
+    <div class="article-header__topics">
+      {% for cat in extra_categories %}
+        <a href="{{ get_taxonomy_url(kind='categories', name=cat) }}" class="topic-label">{{ cat }}</a>
+        {% if not loop.last or tags | length > 0 %}<span class="meta-separator">&middot;</span>{% endif %}
+      {% endfor %}
+      {% for tag in tags %}
+        <a href="{{ get_taxonomy_url(kind='tags', name=tag) }}" class="topic-label">{{ tag }}</a>
+        {% if not loop.last %}<span class="meta-separator">&middot;</span>{% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
   </header>
 
   {# --- Featured image --- #}

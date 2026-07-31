@@ -15,8 +15,14 @@ style = "class"
 light_theme = "github-light"
 dark_theme = "github-dark"
 
+# `categories` is the primary taxonomy: the first one listed becomes the
+# kicker above the headline and the section label in lists. `tags` is
+# optional — omit it and the theme simply renders nothing for it.
 [[taxonomies]]
 name = "categories"
+
+[[taxonomies]]
+name = "tags"
 
 [extra]
 author = "Elena Larsson"

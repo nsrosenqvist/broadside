@@ -36,6 +36,49 @@
   }
 }
 
+// Topic labels — the extra categories and tags in an article header. Lowercase
+// and hash-prefixed so they read as tags at a glance rather than as a second
+// kicker, and tertiary grey so the accent category above the headline stays
+// dominant. The hover rule lives on ::after here because ::before carries the
+// hash, unlike .category-label where ::before is the rule itself.
+// Matches .meta's face and size — this row is post furniture, not body copy.
+.topic-label {
+  font-family: $sans;
+  font-size: 13px;
+  font-weight: 400;
+  text-transform: lowercase;
+  color: $text-tertiary;
+  text-decoration: none;
+  transition: color $transition-fast;
+  position: relative;
+  display: inline-block;
+
+  &::before {
+    content: '#';
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: $text-primary;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform $transition-slow;
+  }
+
+  &:hover {
+    color: $text-primary;
+  }
+
+  &:hover::after {
+    transform: scaleX(1);
+  }
+}
+
 
 // --- Metadata line -------------------------------------------
 

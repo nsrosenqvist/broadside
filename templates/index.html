@@ -18,9 +18,7 @@
 
     {% if featured.taxonomies.categories is defined %}
     <div class="featured-post__category">
-      {% for cat in featured.taxonomies.categories %}
-        <a href="{{ get_taxonomy_url(kind='categories', name=cat) }}" class="category-label">{{ cat }}</a>
-      {% endfor %}
+      <a href="{{ get_taxonomy_url(kind='categories', name=featured.taxonomies.categories | first) }}" class="category-label">{{ featured.taxonomies.categories | first }}</a>
     </div>
     {% endif %}
 
@@ -57,9 +55,7 @@
 
       {% if post.taxonomies.categories is defined %}
       <div class="post-card__category">
-        {% for cat in post.taxonomies.categories %}
-          <a href="{{ get_taxonomy_url(kind='categories', name=cat) }}" class="category-label">{{ cat }}</a>
-        {% endfor %}
+        <a href="{{ get_taxonomy_url(kind='categories', name=post.taxonomies.categories | first) }}" class="category-label">{{ post.taxonomies.categories | first }}</a>
       </div>
       {% endif %}
 
@@ -92,9 +88,7 @@
     <li class="post-list__item">
       {% if post.taxonomies.categories is defined %}
       <div class="post-list__category">
-        {% for cat in post.taxonomies.categories %}
-          <a href="{{ get_taxonomy_url(kind='categories', name=cat) }}" class="category-label">{{ cat }}</a>
-        {% endfor %}
+        <a href="{{ get_taxonomy_url(kind='categories', name=post.taxonomies.categories | first) }}" class="category-label">{{ post.taxonomies.categories | first }}</a>
       </div>
       {% endif %}
 

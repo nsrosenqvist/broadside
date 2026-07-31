@@ -5,6 +5,7 @@ description = "A new generation of tools is reshaping the developer's craft"
 
 [taxonomies]
 categories = ["Technology"]
+tags = ["Tooling", "Craft"]
 
 [extra]
 subtitle = "A new generation of tools is reshaping the developer's craft — not with fanfare, but with careful, deliberate design"
