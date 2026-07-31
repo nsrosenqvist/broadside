@@ -73,7 +73,10 @@
   flex: 1;
 }
 
-.site-nav a {
+// The Subscribe control is a <summary> when it opens a feed menu and an <a>
+// when it doesn't, so both take the nav's link styling.
+.site-nav a,
+.site-nav summary {
   font-family: $sans;
   font-size: 14px;
   font-weight: 400;
@@ -113,9 +116,77 @@
   align-items: center;
   gap: 6px;
   margin-left: auto;
+  cursor: pointer;
+  list-style: none; // hides the <details> marker when it is a <summary>
+
+  &::-webkit-details-marker {
+    display: none;
+  }
 
   svg {
     flex-shrink: 0;
+  }
+}
+
+
+// --- Subscribe feed menu -------------------------------------
+
+.subscribe {
+  margin-left: auto;
+  display: flex;
+  align-items: stretch;
+
+  // Anchor for the menu; the header itself is the stacking context.
+  position: relative;
+
+  // The summary carries margin-left: auto from .site-nav__subscribe, which
+  // would fight the wrapper's. Only the wrapper needs it.
+  .site-nav__subscribe {
+    margin-left: 0;
+  }
+}
+
+.subscribe__chevron {
+  opacity: 0.6;
+  transition: transform $transition-fast;
+}
+
+.subscribe[open] .subscribe__chevron {
+  transform: rotate(180deg);
+}
+
+.subscribe__menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 190px;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0 8px;
+  background-color: $bg;
+  border: 1px solid $border;
+  border-top: none;
+  box-shadow: var(--nav-shadow);
+  z-index: 10;
+}
+
+.subscribe__group {
+  font-family: $sans;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: $text-tertiary;
+  padding: 12px 16px 4px;
+}
+
+// Narrower than a nav link, and without the accent underline sweep — this is
+// a list of destinations, not top-level navigation.
+.site-nav .subscribe__item {
+  font-size: 13px;
+  padding: 6px 16px;
+
+  &::before {
+    display: none;
   }
 }
 
@@ -152,13 +223,41 @@
     .menu-toggle__icon--close { display: block; }
   }
 
-  .site-nav a {
+  // Includes the Subscribe summary — it needs the same touch target as a link.
+  .site-nav a,
+  .site-nav summary {
     padding: 10px 16px;
     font-size: 15px;
   }
 
   .site-nav__subscribe {
     margin-left: 0;
+  }
+
+  // The nav is already a dropped panel here, so the feed menu expands inline
+  // within it rather than floating as a second layer over the page.
+  .subscribe {
+    margin-left: 0;
+    display: block;
+    position: static;
+  }
+
+  .subscribe__menu {
+    position: static;
+    min-width: 0;
+    padding: 0 0 8px;
+    background: none;
+    border: none;
+    box-shadow: none;
+  }
+
+  .site-nav .subscribe__item {
+    font-size: 14px;
+    padding: 8px 16px 8px 32px;
+  }
+
+  .subscribe__group {
+    padding: 10px 16px 2px 32px;
   }
 
   .site-header__inner {

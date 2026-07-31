@@ -41,9 +41,14 @@
   <link rel="preconnect" href="https://fonts.bunny.net">
   <link href="https://fonts.bunny.net/css2?family=Inter:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Source+Serif+4:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ get_url(path='style.css') }}">
+  {# Overridable so term pages can advertise their own feed alongside the
+     site's. The generate_feeds guard lives inside the block, not around it —
+     Tera can't resolve super() for a block nested in control flow. #}
+  {% block feed_links %}
   {% if config.generate_feeds %}
   <link rel="alternate" type="application/rss+xml" title="RSS" href="{{ get_url(path='rss.xml') }}">
   {% endif %}
+  {% endblock feed_links %}
   {# --- Schema.org JSON-LD --- #}
   {% block jsonld %}
   <script type="application/ld+json">
@@ -84,10 +89,38 @@
           {% endfor %}
         {% endif %}
         {% if config.generate_feeds %}
-        <a href="{{ get_url(path='rss.xml') }}" class="site-nav__subscribe">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1" fill="currentColor" stroke="none"/></svg>
+        {% set feed_file = config.feed_filenames | first %}
+        {% set feed_taxonomies = config.taxonomies | filter(attribute="feed", value=true) %}
+        {% set rss_icon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1" fill="currentColor" stroke="none"/></svg>' %}
+        {% if feed_taxonomies | length > 0 %}
+        {# A <details> rather than a scripted menu so it opens, closes and takes
+           keyboard focus with no JS at all; the script below only adds the
+           click-away and Escape niceties. #}
+        <details class="subscribe">
+          <summary class="site-nav__subscribe">
+            {{ rss_icon | safe }}
+            <span>Subscribe</span>
+            <svg class="subscribe__chevron" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 3.5 5 7 8.5 3.5"/></svg>
+          </summary>
+          <div class="subscribe__menu">
+            <a href="{{ get_url(path=feed_file) }}" class="subscribe__item">All posts</a>
+            {% for tax in feed_taxonomies %}
+              {% set tx = get_taxonomy(kind=tax.name) %}
+              {% if tx.items | length > 0 %}
+              <span class="subscribe__group">{{ tax.name | title }}</span>
+              {% for term in tx.items %}
+              <a href="{{ term.permalink ~ feed_file }}" class="subscribe__item">{{ term.name }}</a>
+              {% endfor %}
+              {% endif %}
+            {% endfor %}
+          </div>
+        </details>
+        {% else %}
+        <a href="{{ get_url(path=feed_file) }}" class="site-nav__subscribe">
+          {{ rss_icon | safe }}
           <span>Subscribe</span>
         </a>
+        {% endif %}
         {% endif %}
       </nav>
     </div>
@@ -110,6 +143,24 @@
       toggle.addEventListener('click', function () {
         var open = nav.classList.toggle('is-open');
         toggle.setAttribute('aria-expanded', String(open));
+      });
+    })();
+  </script>
+  <script>
+    // Progressive enhancement for the Subscribe dropdown: <details> already
+    // opens, closes and is keyboard-navigable on its own, so this only adds
+    // click-away and Escape, which the element has no native equivalent for.
+    (function () {
+      var menu = document.querySelector('.subscribe');
+      if (!menu) return;
+      document.addEventListener('click', function (e) {
+        if (menu.open && !menu.contains(e.target)) menu.open = false;
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && menu.open) {
+          menu.open = false;
+          menu.querySelector('summary').focus();
+        }
       });
     })();
   </script>

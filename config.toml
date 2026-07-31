@@ -18,8 +18,11 @@ dark_theme = "github-dark"
 # `categories` is the primary taxonomy: the first one listed becomes the
 # kicker above the headline and the section label in lists. `tags` is
 # optional — omit it and the theme simply renders nothing for it.
+# Per-term feeds at /categories/<term>/rss.xml. The theme's Subscribe
+# dropdown lists every term of every taxonomy with feed = true.
 [[taxonomies]]
 name = "categories"
+feed = true
 
 [[taxonomies]]
 name = "tags"

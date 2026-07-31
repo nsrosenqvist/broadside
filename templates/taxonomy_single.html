@@ -2,6 +2,16 @@
 
 {% block title %}{{ term.name }} — {{ config.title }}{% endblock title %}
 
+{# Advertise this term's own feed alongside the site's, so a reader landing on
+   /categories/security/ can subscribe to just that. #}
+{% block feed_links %}
+{{ super() }}
+{% if taxonomy.feed %}
+{% set feed_file = config.feed_filenames | first %}
+<link rel="alternate" type="application/rss+xml" title="{{ term.name }}" href="{{ term.permalink ~ feed_file }}">
+{% endif %}
+{% endblock feed_links %}
+
 {% block content %}
 <div class="content-wrapper">
 
