@@ -203,7 +203,7 @@ Markdown **works** in here, with [links](/), `code` and lists.
 
 Any other `kind` also works and gets its own capitalised label, so a typo appears on the page as "Waring" rather than silently rendering as a note.
 
-Callouts are set as an editorial sidebar — a rule and a small sans kicker over body copy — rather than a tinted box, so they sit beside a blockquote without competing with it. `warning` and `caution` take the accent colour; the rest stay grey, on the principle that colour should carry meaning rather than decorate. To give every kind its own hue, override `.callout--tip` and friends in your own Sass.
+Callouts are set as an editorial sidebar — a rule, a small sans kicker, and body text a step down in emphasis — rather than a tinted box, so they sit beside a blockquote without competing with it. `warning` and `caution` take the accent colour; the rest stay grey, on the principle that colour should carry meaning rather than decorate. To give every kind its own hue, override `.callout--tip` and friends in your own Sass.
 
 ## AI transparency
 

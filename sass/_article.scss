@@ -208,6 +208,16 @@
     }
   }
 
+  // Set in secondary rather than primary. Without this the body of a callout
+  // is body copy exactly, and the rule and kicker are left doing all the work
+  // of saying "this is an aside" — which they lose against a full column of
+  // text at the same weight and colour. Secondary clears WCAG AA in both
+  // schemes (5.03:1 light, 6.17:1 dark), so this is a step down in emphasis
+  // and not in legibility.
+  .callout__body {
+    color: $text-secondary;
+  }
+
   .callout__body > :last-child {
     margin-bottom: 0;
   }
