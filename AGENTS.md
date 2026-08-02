@@ -91,6 +91,12 @@ sentence all come out of it, so a wording or precedence change happens once.
 The postures map onto EU AI Act Art. 50 and the header comment in that file
 explains which clause each one answers; keep them in step if you rename any.
 
+The disclosure prose lives in one macro, `statement`, which the article note
+and the feed item both wrap — the page in a `<p>`, the feed in escaped
+entities. They share one visibility rule too, so `show_when_none` cannot mean
+one thing on the page and another in a reader. Add a posture and you add it
+once. Don't inline a sentence into either caller.
+
 Four things in here will look like mistakes and are not:
 
 - **Config prose is piped through `| safe`.** A macro's interpolations are
