@@ -42,3 +42,20 @@ nav_links = [
   { name = "Notes", url = "/notes" },
   { name = "About", url = "/about" },
 ]
+
+# AI transparency. Every string below has a built-in English default, so the
+# whole block is optional — declaring [extra.ai_transparency] at all is what
+# switches the feature on. The postures (none / assisted / edited / generated)
+# follow the seams of EU AI Act Art. 50; see the README.
+[extra.ai_transparency]
+default_text = "none"
+# Set true to label posts with no AI involvement too. Worth the extra line:
+# if only AI-touched posts carry a label, an unlabelled post is ambiguous
+# between "written by hand" and "the author forgot".
+show_when_none = true
+# The named person or entity holding editorial responsibility — the condition
+# the Art. 50(4) exception is granted against. Falls back to the post author,
+# then the site author.
+editorial_responsibility = "Elena Larsson"
+policy_url = "/about"
+policy_label = "How we use AI"

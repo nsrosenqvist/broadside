@@ -10,6 +10,8 @@ tags = ["Tooling", "Craft"]
 [extra]
 subtitle = "A new generation of tools is reshaping the developer's craft — not with fanfare, but with careful, deliberate design"
 author = "Elena Larsson"
+ai_text = "edited"
+ai_image = "generated"
 image = "featured.png"
 image_caption = "A developer's workspace, circa 2026. Photograph by M. Strand"
 +++

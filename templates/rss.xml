@@ -1,0 +1,54 @@
+{#-
+  Zola's built-in rss.xml, overridden for one reason: a feed subscriber's
+  "first interaction or exposure" with an article (Art. 50(5)) happens in
+  their reader, not on the site, so the AI transparency note has to travel
+  with the item. Everything else here is the stock template — keep it in step
+  with upstream when bumping Zola.
+
+  The note is rendered without `| safe`, matching the un-escaped `page.content`
+  below it, so both are autoescaped identically into the description.
+
+  The whitespace control on this comment and the import is load-bearing: the
+  XML declaration has to be the very first thing in the file.
+-#}
+{%- import "macros/ai.html" as ai -%}
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+      <title>{{ config.title }}
+        {%- if term %} - {{ term.name }}
+        {%- elif section.title %} - {{ section.title }}
+        {%- endif -%}
+      </title>
+      <link>
+        {%- if section -%}
+          {{ section.permalink | escape_xml | safe }}
+        {%- else -%}
+          {{ config.base_url | escape_xml | safe }}
+        {%- endif -%}
+      </link>
+      <description>{{ config.description }}</description>
+      <generator>Zola</generator>
+      <language>{{ lang }}</language>
+      <atom:link href="{{ feed_url | safe }}" rel="self" type="application/rss+xml"/>
+      {% if last_updated is defined %}<lastBuildDate>{{ last_updated | date(format="%a, %d %b %Y %H:%M:%S %z") }}</lastBuildDate>{% endif %}
+      {%- for page in pages %}
+      <item>
+          <title>{{ page.title }}</title>
+          <pubDate>{{ page.date | date(format="%a, %d %b %Y %H:%M:%S %z") }}</pubDate>
+          <author>
+            {%- if page.authors -%}
+              {{ page.authors[0] }}
+            {%- elif config.author -%}
+              {{ config.author }}
+            {%- else -%}
+              Unknown
+            {%- endif -%}
+          </author>
+          <link>{{ page.permalink | escape_xml | safe }}</link>
+          <guid>{{ page.permalink | escape_xml | safe }}</guid>
+          <description xml:base="{{ page.permalink | escape_xml | safe }}">{{ ai::feed_note(page=page, config=config) }}{% if page.summary %}{{ page.summary }}{% else %}{{ page.content }}{% endif %}</description>
+      </item>
+      {%- endfor %}
+    </channel>
+</rss>
