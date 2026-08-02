@@ -17,7 +17,7 @@ This is a **standalone Zola theme repository**, not a full site. It gets pulled 
 - `content/` — Demo content exercising all theme features
 - `screenshot.png` — Theme screenshot for the Zola gallery
 - `sass/` — `style.scss` is the entry point; it imports partials (`_variables.scss`, `_reset.scss`, `_layout.scss`, etc.). Design tokens live in `_variables.scss`.
-- `templates/` — Zola templates. `base.html` is the shell; all others extend it.
+- `templates/` — Zola templates. `base.html` is the shell; all others extend it. `macros/` holds Tera macro modules, `shortcodes/` the shortcodes authors call from markdown, and `rss.xml` is a deliberate copy of Zola's built-in feed template (see below)
 - `dev.sh` — Local dev server launcher (see below)
 - `README.md` — User-facing documentation
 
@@ -81,6 +81,46 @@ All transitions use `ease` timing, 150–300ms range.
 - The `extra.subtitle` field falls back to `page.description`
 - Author falls back from `page.extra.author` → `config.extra.author`
 - Syntax highlighting requires `highlight_theme = "css"` in `config.toml` so that dark mode token colors work
+
+## AI transparency
+
+The user-facing contract is in the README; this is what an editor of the
+templates needs to know. `templates/macros/ai.html` is the single place a
+post's posture is resolved — page furniture, image credits and the feed
+sentence all come out of it, so a wording or precedence change happens once.
+The postures map onto EU AI Act Art. 50 and the header comment in that file
+explains which clause each one answers; keep them in step if you rename any.
+
+Four things in here will look like mistakes and are not:
+
+- **Config prose is piped through `| safe`.** A macro's interpolations are
+  escaped by the macro's own template *and* again by the caller, so an
+  apostrophe in a note came out as `&amp;#x27;` on the page. `| safe` leaves
+  exactly one pass. It also means these strings are inserted as authored,
+  which the README states
+- **`templates/rss.xml` is a vendored copy of Zola's built-in.** It exists so
+  the disclosure travels with the feed item; Art. 50(5) counts a subscriber's
+  reader as first exposure. Re-sync it when bumping Zola
+- **The feed macro writes `&lt;p&gt;` rather than `<p>`.** An RSS
+  `<description>` carries HTML escaped *into* the XML — a literal `<p>` would
+  become an XML child element of `<description>` instead of part of the item's
+  content. Template literals are never escaped, so the entities are written by
+  hand to match the escaped `page.content` beside them
+- **The separator before an image credit is emitted by the template, not
+  CSS.** A caption is a text node, so no selector can distinguish "credit
+  after a caption" from "credit standing alone", and `:not(:first-child)`
+  silently never fires
+
+Provenance narrows across three levels — `ai_image` (whole post) → `image_ai`
+(featured image) → `figure(ai=…)` (one body image). Body images deliberately
+do not inherit the post-level claim; a blanket statement must not credit a
+photograph somebody took with a camera. When adding a fifth posture or a new
+site, check all four render sites: metadata line, foot note, image caption,
+feed item.
+
+The feature is off unless a site declares `[extra.ai_transparency]`. Any
+change here should be re-checked against a build with that block deleted —
+existing sites must see byte-identical output.
 
 ## Content structure for dev site
 

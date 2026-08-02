@@ -80,6 +80,43 @@
 }
 
 
+// --- AI transparency flag ------------------------------------
+//
+// Sits in the article metadata line and reads as part of it — same face and
+// size, no badge, no icon. What sets it apart is the dotted underline, which
+// says "there is an explanation" without raising its voice; the explanation
+// is the .ai-disclosure note it links to at the foot of the article.
+//
+// The `generated` posture is the one case where disclosure is an obligation
+// rather than a courtesy — no human took editorial responsibility for the
+// text — so it carries the accent. Visual weight tracks how much the reader
+// needs to know before believing the page.
+.ai-flag {
+  font-family: $sans;
+  font-size: 13px;
+  color: $text-secondary;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  text-decoration-color: $text-tertiary;
+  transition: color $transition-fast, text-decoration-color $transition-fast;
+
+  &:hover {
+    color: $text-primary;
+    text-decoration-color: $text-primary;
+  }
+}
+
+.ai-flag--generated {
+  color: $accent;
+  text-decoration-color: $accent;
+}
+
+// Image provenance credit, appended inside the featured image's caption —
+// the line a newspaper already reserves for "Photograph by …". It inherits
+// the caption's face; the separator before it is emitted by the template,
+// which is the only place that can know whether a caption precedes it.
+
+
 // --- Metadata line -------------------------------------------
 
 .meta {

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "macros/ai.html" as ai %}
 
 {% block title %}{{ page.title }} — {{ config.title }}{% endblock title %}
 {% block description %}{{ page.description | default(value='') }}{% endblock description %}
@@ -120,6 +121,9 @@
         <span class="meta-separator">&middot;</span>
         {{ page.reading_time }} min read
       {% endif %}
+      {# Art. 50(5) wants the disclosure at first exposure, so it rides the
+         metadata line rather than waiting for the note at the foot. #}
+      {{ ai::meta_label(page=page, config=config) }}
     </div>
 
     {% if extra_categories | length > 0 or tags | length > 0 %}
@@ -140,8 +144,10 @@
   {% if page.extra.image is defined %}
   <figure class="article-featured-image">
     <img src="{{ page.permalink ~ page.extra.image }}" alt="{{ page.title }}">
-    {% if page.extra.image_caption is defined %}
-    <figcaption class="article-featured-image__caption">{{ page.extra.image_caption }}</figcaption>
+    {# An AI image credit stands in for a caption when there isn't one — the
+       disclosure can't be conditional on the author having written prose. #}
+    {% if page.extra.image_caption is defined or page.extra.image_ai is defined or page.extra.ai_image is defined %}
+    <figcaption class="article-featured-image__caption">{{ page.extra.image_caption | default(value="") }}{{ ai::image_credit(page=page, config=config, after_caption=page.extra.image_caption is defined) }}</figcaption>
     {% endif %}
   </figure>
   {% endif %}
@@ -150,6 +156,9 @@
   <div class="article-body">
     {{ page.content | safe }}
   </div>
+
+  {# --- AI transparency note --- #}
+  {{ ai::note(page=page, config=config) }}
 
   {# --- Previous / Next navigation --- #}
   {% if page.lower or page.higher %}

@@ -8,6 +8,7 @@ categories = ["Operations"]
 
 [extra]
 author = "Elena Larsson"
+ai_text = "assisted"
 +++
 
 Monitoring tells you when something breaks. Observability tells you *why*. The distinction matters more than most teams realize, and confusing the two leads to a dangerous confidence in the health of your systems.

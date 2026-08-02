@@ -219,6 +219,25 @@
     margin: 1.5em 0;
   }
 
+  // The `figure` shortcode. The figure owns the vertical rhythm so the
+  // caption stays attached to its image — the bare `img` margin above would
+  // otherwise push the two apart.
+  .article-figure {
+    margin: 1.5em 0;
+
+    img {
+      margin: 0;
+    }
+  }
+
+  .article-figure__caption {
+    font-family: $sans;
+    font-size: 12px;
+    font-style: italic;
+    color: $text-tertiary;
+    margin-top: 8px;
+  }
+
   // Tables
   table {
     width: 100%;
@@ -303,6 +322,63 @@
 }
 
 
+// --- AI transparency note ------------------------------------
+//
+// An editor's note, printed the way a broadsheet prints one: a hairline rule,
+// a small sans kicker, and the note itself in italic — set apart from the
+// article without being boxed off from it. It is the expansion of .ai-flag in
+// the metadata line, which anchors here.
+//
+// Sits above .post-nav, so the disclosure is the last thing about *this*
+// article the reader passes before being handed to the next one.
+.ai-disclosure {
+  margin-top: 48px;
+  padding-top: 20px;
+  border-top: 1px solid $border;
+}
+
+.ai-disclosure__kicker {
+  font-family: $sans;
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: $text-tertiary;
+  margin-bottom: 8px;
+}
+
+.ai-disclosure__body {
+  font-family: $body-serif;
+  font-size: 15px;
+  font-style: italic;
+  line-height: 1.6;
+  color: $text-secondary;
+}
+
+.ai-disclosure__policy {
+  font-style: normal;
+  font-family: $sans;
+  font-size: 13px;
+  color: $accent;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $text-primary;
+  }
+}
+
+// The note and the prev/next block both open with a rule. When they meet, the
+// second rule is redundant furniture — drop it and let the note's own spacing
+// carry the gap.
+.ai-disclosure + .post-nav {
+  margin-top: 32px;
+  padding-top: 0;
+  border-top: none;
+}
+
+
 // --- Prev / Next navigation ----------------------------------
 
 .post-nav {
@@ -318,7 +394,9 @@
 .post-nav__item {
   text-decoration: none;
   display: block;
-  padding: 16px;
+  // Vertical padding only. Horizontal padding would inset the labels from the
+  // content edge that every rule, paragraph and note above them aligns to.
+  padding: 16px 0;
   position: relative;
 }
 

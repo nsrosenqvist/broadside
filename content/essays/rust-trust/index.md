@@ -10,6 +10,7 @@ tags = ["Rust"]
 [extra]
 subtitle = "Why a single static binary might be the most radical act of software security"
 author = "Elena Larsson"
+ai_text = "none"
 image = "featured.png"
 +++
 

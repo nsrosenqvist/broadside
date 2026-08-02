@@ -9,6 +9,7 @@ categories = ["Architecture"]
 [extra]
 subtitle = "Why the boundaries you draw matter more than the code you write"
 author = "Elena Larsson"
+ai_text = "generated"
 +++
 
 The monolith is not dead because microservices won. The monolith is dead because we learned, painfully and slowly, that the most important architectural decision is not how you structure your code — it is where you draw the boundaries.

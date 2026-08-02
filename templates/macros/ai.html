@@ -1,0 +1,185 @@
+{#
+  AI transparency labelling.
+
+  The vocabulary here follows the seams of the EU AI Act's Article 50 rather
+  than a homegrown "was AI used, yes/no" scale, because the Act draws its
+  lines in places a boolean cannot reach:
+
+    none       No AI involved in the text.
+    assisted   AI used as an assistive function for standard editing, without
+               substantially altering the input data or its semantics — the
+               language of the Art. 50(2) exemption. The author wrote it.
+    edited     AI produced material that a human then reviewed, with a named
+               person holding editorial responsibility. This is the Art. 50(4)
+               exception, and stating it is the point: the exception is only
+               available to someone who will put their name to the review.
+    generated  AI-generated text published without human editorial review —
+               the case where Art. 50(4) makes disclosure mandatory.
+
+  Images run on their own track, because Art. 50(4)'s first subparagraph is
+  about the picture rather than about where it sits on the page — a generated
+  diagram halfway down a post is as in scope as the one at the top. So there
+  are three levels, narrowing as they go:
+
+    [extra] ai_image   a claim about the article's imagery as a whole. Puts a
+                       sentence in the note at the foot, and supplies the
+                       default posture for the featured image.
+    [extra] image_ai   the featured image alone, overriding the above.
+                       "none" opts the hero out of a post-level claim.
+    {{ figure(ai=…) }} one body image, stated at the point of use. Never
+                       inherits: a blanket claim shouldn't silently credit a
+                       photograph somebody took with a camera.
+
+  Article 50(5) requires the disclosure to be given "in a clear and
+  distinguishable manner at the latest at the time of the first interaction
+  or exposure", which is why the label sits in the article's metadata line
+  and in the feed item, not only in the note at the foot of the page. A
+  reader in an RSS client may never load the page at all.
+
+  Every string has an English fallback here, so the theme works with no
+  configuration; a site overrides any of them under [extra.ai_transparency].
+  The keys are deliberately flat (`label_edited` rather than a nested
+  `[extra.ai_transparency.edited] label`) — a distributed theme meets
+  half-filled config all the time, and a flat key with a `default` filter
+  degrades where a dynamic lookup into a missing table raises.
+#}
+
+
+{# --- Metadata-line label -----------------------------------------------
+  Renders its own leading separator, so callers can drop it into a metadata
+  line without knowing whether it will produce anything.
+#}
+{% macro meta_label(page, config) %}
+{%- if config.extra.ai_transparency is defined -%}
+  {%- set at = config.extra.ai_transparency -%}
+  {%- set posture = page.extra.ai_text | default(value=at.default_text | default(value="none")) -%}
+  {%- if posture != "none" or at.show_when_none | default(value=false) -%}
+  <span class="meta-separator">&middot;</span>
+  <a class="ai-flag ai-flag--{{ posture }}" href="#ai-transparency">
+    {%- if posture == "generated" %}{{ at.label_generated | default(value="AI-generated") | safe }}
+    {%- elif posture == "edited" %}{{ at.label_edited | default(value="AI-drafted, human-edited") | safe }}
+    {%- elif posture == "assisted" %}{{ at.label_assisted | default(value="AI-assisted") | safe }}
+    {%- else %}{{ at.label_none | default(value="Written without AI") | safe }}
+    {%- endif %}</a>
+  {%- endif -%}
+{%- endif -%}
+{% endmacro meta_label %}
+
+
+{# --- Note at the foot of the article ------------------------------------
+  The expansion of the label above. `aria-labelledby` points at the kicker so
+  the region is announced as what it is; Art. 50(5) also requires the
+  disclosure to meet accessibility requirements, which is why the label is
+  real text rather than an icon or a title attribute.
+#}
+{% macro note(page, config) %}
+{%- if config.extra.ai_transparency is defined -%}
+  {%- set at = config.extra.ai_transparency -%}
+  {%- set posture = page.extra.ai_text | default(value=at.default_text | default(value="none")) -%}
+  {%- set image_posture = page.extra.ai_image | default(value="none") -%}
+  {%- if posture != "none" or image_posture != "none" or at.show_when_none | default(value=false) -%}
+  {%- set editor = at.editorial_responsibility | default(value=page.extra.author | default(value=config.extra.author | default(value="the author"))) -%}
+  <aside class="ai-disclosure" id="ai-transparency" aria-labelledby="ai-disclosure-kicker">
+    <p class="ai-disclosure__kicker" id="ai-disclosure-kicker">{{ at.heading | default(value="AI transparency") | safe }}</p>
+    <p class="ai-disclosure__body">
+      {%- if posture == "generated" %}{{ at.note_generated | default(value="This text was generated by a language model and published without human editorial review.") | safe }}
+      {%- elif posture == "edited" %}{{ at.note_edited | default(value="Parts of this article were drafted by a language model. It was reviewed before publication, and " ~ editor ~ " holds editorial responsibility for it.") | safe }}
+      {%- elif posture == "assisted" %}{{ at.note_assisted | default(value="A language model was used for research and copy-editing. The substance of the text is the author's own.") | safe }}
+      {%- elif posture == "none" and at.show_when_none | default(value=false) %}{{ at.note_none | default(value="This article was written without the use of AI.") | safe }}
+      {%- endif -%}
+      {#- A statement about the article's imagery as a whole, not about the
+          featured image. Saying "the image accompanying it" would tell a
+          reader the hero is AI and imply that nothing further down is. -#}
+      {%- if image_posture == "generated" %} {{ at.note_image_generated | default(value="Imagery in this article was generated with an AI model.") | safe }}
+      {%- elif image_posture == "edited" %} {{ at.note_image_edited | default(value="Imagery in this article was altered with AI tools.") | safe }}
+      {%- endif -%}
+      {#- The link is optional and the statement never depends on it: a site
+          with no colophon page yet still discloses, it just doesn't link
+          onwards. Guarded on truthiness rather than `is defined`, because
+          `policy_url = ""` is the natural way to write "no link" and would
+          otherwise produce `href=""` — a link back to the current page.
+          An empty label falls back to the default instead of leaving a bare
+          arrow with no accessible text. -#}
+      {%- if at.policy_url | default(value="") %}
+      <a class="ai-disclosure__policy" href="{{ at.policy_url }}">
+        {%- if at.policy_label | default(value="") %}{{ at.policy_label | safe }}
+        {%- else %}How this site uses AI
+        {%- endif %} &rarr;</a>
+      {%- endif -%}
+    </p>
+  </aside>
+  {%- endif -%}
+{%- endif -%}
+{% endmacro note %}
+
+
+{# --- Featured-image caption suffix --------------------------------------
+  Art. 50(4)'s first subparagraph covers "authentic-looking" generated or
+  manipulated images, and its artistic/creative carve-out only softens the
+  duty to a disclosure that "does not hamper the display or enjoyment of the
+  work". The caption under the image is where a newspaper prints exactly this
+  credit, so that is where it goes — no badge over the picture.
+#}
+{# The credit itself, for a posture the caller has already resolved. The
+   `figure` shortcode calls this directly for body images; `image_credit`
+   below wraps it for the article's featured image. #}
+{% macro credit(posture, config, after_caption) %}
+{%- if config.extra.ai_transparency is defined and (posture == "generated" or posture == "edited") -%}
+  {%- set at = config.extra.ai_transparency -%}
+  {#- The separator has to be decided here, not in CSS: a caption is a text
+      node, so no selector can tell "credit after a caption" from "credit
+      standing alone". A bare space would read as one sentence running into
+      the next, since captions don't reliably end in a full stop. -#}
+  {%- if after_caption %}<span class="meta-separator">&middot;</span>{% endif -%}
+  {%- if posture == "generated" %}<span class="ai-credit">{{ at.credit_image_generated | default(value="Generated with an AI model.") | safe }}</span>
+  {%- else %}<span class="ai-credit">{{ at.credit_image_edited | default(value="Altered with AI tools.") | safe }}</span>
+  {%- endif -%}
+{%- endif -%}
+{% endmacro credit %}
+
+
+{# The featured image's credit. Its posture defaults to the post-level
+   `ai_image` claim, so the ordinary case — every picture in the post came out
+   of a model — needs one frontmatter key and not two. A post whose hero is a
+   real photograph but whose diagrams are not sets `image_ai = "none"` to opt
+   the hero back out; body images are never inherited into, and state their
+   own posture through the shortcode's `ai` argument. #}
+{% macro image_credit(page, config, after_caption) %}
+{%- set posture = page.extra.image_ai | default(value=page.extra.ai_image | default(value="none")) -%}
+{{- self::credit(posture=posture, config=config, after_caption=after_caption) -}}
+{% endmacro image_credit %}
+
+
+{# --- Feed-item sentence -------------------------------------------------
+  "First exposure" for a feed subscriber is the item in their reader, so the
+  disclosure has to travel with the content.
+
+  Two escaping details here are load-bearing; both were arrived at by reading
+  the built output, and both will look wrong to anyone who edits this in a
+  hurry.
+
+  An RSS <description> carries HTML *escaped into* the XML — that is why the
+  stock template emits `page.content` as `&lt;p&gt;…`. So the wrapper tags are
+  written as entities, not as literal `<p>`: template literals are never
+  escaped, and a real `<p>` here would become an XML child element of
+  <description> rather than part of the item's HTML.
+
+  The interpolations then need exactly one escape, and they already have it.
+  This macro lives in a .html file, so Tera escapes its output for HTML; the
+  `| safe` suppresses a second pass from the calling rss.xml. Escaping by
+  hand as well (`| escape_xml | safe`) is the tempting mistake — it yields
+  `&amp;#x27;` where the reader wanted an apostrophe.
+#}
+{% macro feed_note(page, config) %}
+{%- if config.extra.ai_transparency is defined -%}
+  {%- set at = config.extra.ai_transparency -%}
+  {%- set posture = page.extra.ai_text | default(value=at.default_text | default(value="none")) -%}
+  {%- if posture != "none" -%}
+  {%- set editor = at.editorial_responsibility | default(value=page.extra.author | default(value=config.extra.author | default(value="the author"))) -%}
+    {%- if posture == "generated" %}&lt;p&gt;&lt;em&gt;{{ at.note_generated | default(value="This text was generated by a language model and published without human editorial review.") | safe }}&lt;/em&gt;&lt;/p&gt;
+    {%- elif posture == "edited" %}&lt;p&gt;&lt;em&gt;{{ at.note_edited | default(value="Parts of this article were drafted by a language model. It was reviewed before publication, and " ~ editor ~ " holds editorial responsibility for it.") | safe }}&lt;/em&gt;&lt;/p&gt;
+    {%- elif posture == "assisted" %}&lt;p&gt;&lt;em&gt;{{ at.note_assisted | default(value="A language model was used for research and copy-editing. The substance of the text is the author's own.") | safe }}&lt;/em&gt;&lt;/p&gt;
+    {%- endif -%}
+  {%- endif -%}
+{%- endif -%}
+{% endmacro feed_note %}

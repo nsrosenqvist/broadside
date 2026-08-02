@@ -1,0 +1,28 @@
+{#-
+  A body image with a caption, and optionally an AI provenance credit.
+
+    {{ figure(src="chart.png", alt="…", caption="…", ai="generated") }}
+
+  Plain markdown `![alt](src.png)` keeps working and is still the right thing
+  for an image that needs neither. This exists for the two that markdown has
+  no syntax for: a real caption, and the `ai` credit that Art. 50(4) attaches
+  to generated or manipulated images wherever they appear in a post.
+
+  `ai` is deliberately not inherited from the post-level `ai_image` claim —
+  see templates/macros/ai.html. Values: "generated", "edited", or omitted.
+
+  `src` is resolved against the page, so a co-located image is just its
+  filename; an absolute or protocol-relative URL is passed through.
+-#}
+{%- import "macros/ai.html" as ai -%}
+{%- if src is starting_with("http") or src is starting_with("/") -%}
+  {%- set url = src -%}
+{%- else -%}
+  {%- set url = page.permalink ~ src -%}
+{%- endif -%}
+<figure class="article-figure">
+  <img src="{{ url }}" alt="{{ alt | default(value=caption | default(value='')) }}">
+  {%- if caption is defined or ai is defined %}
+  <figcaption class="article-figure__caption">{{ caption | default(value="") }}{{ ai::credit(posture=ai | default(value="none"), config=config, after_caption=caption is defined) }}</figcaption>
+  {%- endif %}
+</figure>

@@ -9,6 +9,7 @@ categories = ["Engineering"]
 [extra]
 subtitle = "The unsexy stack choices that keep systems running for years"
 author = "Marcus Chen"
+ai_text = "assisted"
 image = "featured.png"
 +++
 
@@ -36,7 +37,7 @@ Boring does not mean outdated. It means:
 
 Boring technology compounds. Each year of uptime is a year of not rewriting, not migrating, not debugging novel failure modes. That time gets invested in the product, in the user experience, in the things that actually differentiate your business.
 
-![System reliability over time — boring technology wins in the long run](stability-chart.png)
+{{ figure(src="stability-chart.png", alt="System reliability over time — boring technology wins in the long run", caption="System reliability over time.", ai="generated") }}
 
 The graph speaks for itself: teams that resist the urge to chase every new tool spend less time firefighting and more time building. Stability is not stagnation — it is a compounding advantage.
 
