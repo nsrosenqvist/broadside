@@ -21,8 +21,13 @@
   {%- set url = page.permalink ~ src -%}
 {%- endif -%}
 <figure class="article-figure">
+  {#- `alt` falls back to the raw caption, deliberately un-rendered: alt text
+      is read aloud, and `<code>` markers in it would be noise. -#}
   <img src="{{ url }}" alt="{{ alt | default(value=caption | default(value='')) }}">
   {%- if caption is defined or ai is defined %}
-  <figcaption class="article-figure__caption">{{ caption | default(value="") }}{{ ai::credit(posture=ai | default(value="none"), config=config, after_caption=caption is defined) }}</figcaption>
+  {#- The caption takes inline markdown — captions routinely name a type or a
+      flag, and `List<V3>` set in backticks is worse than useless. `inline`
+      keeps it out of a <p> of its own inside the <figcaption>. -#}
+  <figcaption class="article-figure__caption">{{ caption | default(value="") | markdown(inline=true) | safe }}{{ ai::credit(posture=ai | default(value="none"), config=config, after_caption=caption is defined) }}</figcaption>
   {%- endif %}
 </figure>

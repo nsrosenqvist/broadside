@@ -147,7 +147,9 @@
     {# An AI image credit stands in for a caption when there isn't one — the
        disclosure can't be conditional on the author having written prose. #}
     {% if page.extra.image_caption is defined or page.extra.image_ai is defined or page.extra.ai_image is defined %}
-    <figcaption class="article-featured-image__caption">{{ page.extra.image_caption | default(value="") }}{{ ai::image_credit(page=page, config=config, after_caption=page.extra.image_caption is defined) }}</figcaption>
+    {# Inline markdown, matching the `figure` shortcode — a caption naming a
+       type or a flag shouldn't be the one place backticks come out raw. #}
+    <figcaption class="article-featured-image__caption">{{ page.extra.image_caption | default(value="") | markdown(inline=true) | safe }}{{ ai::image_credit(page=page, config=config, after_caption=page.extra.image_caption is defined) }}</figcaption>
     {% endif %}
   </figure>
   {% endif %}

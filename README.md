@@ -137,7 +137,7 @@ ai_image = "generated"
 | `[extra] subtitle` | No | Longer subtitle shown on the article page (falls back to `description`) |
 | `[extra] author` | No | Author name (falls back to `config.extra.author`) |
 | `[extra] image` | No | Featured image filename (co-located with the post). Cropped to 3:2 in the homepage grid; full-bleed at its natural ratio on the article page and as the featured post |
-| `[extra] image_caption` | No | Caption displayed below the featured image |
+| `[extra] image_caption` | No | Caption displayed below the featured image. Takes inline markdown |
 | `[extra] og_image` | No | Override the OpenGraph/Twitter image (falls back to `image`, then `default_og_image`) |
 | `[extra] ai_text` | No | AI provenance of the article's text: `none`, `assisted`, `edited`, or `generated` (falls back to `default_text`). See [AI transparency](#ai-transparency) |
 | `[extra] ai_note` | No | Replaces the site-wide sentence in this post's disclosure with one written for it. The label still comes from `ai_text` |
@@ -298,7 +298,7 @@ A body image's posture is never inherited from `ai_image` — a blanket claim sh
 |---|---|---|
 | `src` | Yes | Image filename, resolved against the page; absolute and `http(s)` URLs pass through |
 | `alt` | No | Alt text (falls back to `caption`) |
-| `caption` | No | Caption below the image |
+| `caption` | No | Caption below the image. Takes inline markdown, so `` `code` ``, *emphasis* and links all work |
 | `ai` | No | `generated` or `edited`; adds a provenance credit to the caption line |
 
 Plain markdown `![alt](src.png)` keeps working and remains the right thing for an image needing neither a caption nor a credit.
