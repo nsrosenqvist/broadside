@@ -91,6 +91,13 @@ sentence all come out of it, so a wording or precedence change happens once.
 The postures map onto EU AI Act Art. 50 and the header comment in that file
 explains which clause each one answers; keep them in step if you rename any.
 
+A post's `ai_note` replaces the posture's sentence but never its label — the
+labels are the comparable part of the scheme and per-post wording would let
+two posts claim the same posture in different words. `ai_note` also forces
+visibility everywhere the text disclosure is decided (byline, note, feed):
+someone who wrote a sentence meant it to be read, and silently dropping it
+under `show_when_none = false` would be the worst possible failure here.
+
 The disclosure prose lives in one macro, `statement`, which the article note
 and the feed item both wrap — the page in a `<p>`, the feed in escaped
 entities. They share one visibility rule too, so `show_when_none` cannot mean

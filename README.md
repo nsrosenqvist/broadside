@@ -140,6 +140,7 @@ ai_image = "generated"
 | `[extra] image_caption` | No | Caption displayed below the featured image |
 | `[extra] og_image` | No | Override the OpenGraph/Twitter image (falls back to `image`, then `default_og_image`) |
 | `[extra] ai_text` | No | AI provenance of the article's text: `none`, `assisted`, `edited`, or `generated` (falls back to `default_text`). See [AI transparency](#ai-transparency) |
+| `[extra] ai_note` | No | Replaces the site-wide sentence in this post's disclosure with one written for it. The label still comes from `ai_text` |
 | `[extra] ai_image` | No | AI provenance of the article's imagery as a whole: `generated` or `edited` |
 | `[extra] image_ai` | No | Overrides `ai_image` for the featured image alone; `none` opts it out |
 
@@ -241,6 +242,20 @@ credit_image_edited = "Altered with AI tools."
 These strings are inserted without escaping so you can emphasize a word, which also means you are responsible for what you put in them.
 
 Omitting any of them gets you the default above. The one key where empty means something different is `policy_url`: leaving it empty (or out) drops the link from the note while the disclosure itself stays, since whether you have a policy page to link to has no bearing on whether the article needs labelling. An empty `policy_label` falls back to the default text rather than leaving a bare arrow.
+
+### Saying something specific about one post
+
+A site-wide sentence has to be bland enough to fit every post that shares a posture. Where a particular piece deserves a precise account, `ai_note` replaces it:
+
+```toml
+[extra]
+ai_text = "assisted"
+ai_note = "The prose is mine. A model helped with the benchmark tables and caught two factual errors before publication."
+```
+
+The label in the byline still comes from `ai_text`, so the vocabulary stays comparable across the archive — a reader scanning your posts sees the same four labels meaning the same four things, and only the explanation gets specific. The note replaces the site-wide sentence rather than appending to it; a post-level statement about imagery, if any, still follows it.
+
+Writing an `ai_note` is treated as an intent to disclose, so a post carrying one shows its label and note even where the settings would otherwise stay silent. Per-post wording is available for the note only, not for the labels.
 
 ### Images
 

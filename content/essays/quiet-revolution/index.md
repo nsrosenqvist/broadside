@@ -12,6 +12,7 @@ subtitle = "A new generation of tools is reshaping the developer's craft — not
 author = "Elena Larsson"
 ai_text = "edited"
 ai_image = "generated"
+ai_note = "The outline and the section on provenance came out of a language model; the argument and the closing are mine. Every claim was checked before publication, and Elena Larsson holds editorial responsibility for it."
 image = "featured.png"
 image_caption = "A developer's workspace, circa 2026. Photograph by M. Strand"
 +++
