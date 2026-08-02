@@ -1,0 +1,6 @@
+# Isolated git worktrees used by coding agents
+.claude/
+
+# Zola build output, if the theme is ever built in place rather than through
+# dev.sh (which builds into /tmp)
+public/
