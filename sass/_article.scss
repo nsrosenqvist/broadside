@@ -373,6 +373,28 @@
 }
 
 
+// --- Inline code inside captions ------------------------------
+//
+// Captions take inline markdown, and naming a type or a flag in one is the
+// common case. Two things go wrong without this rule, in opposite directions:
+// `.article-body code` is an absolute 14px, so code in a 12px figure caption
+// comes out *larger* than the sentence around it; and the featured image's
+// caption lives outside `.article-body` entirely, where that rule never
+// applies, leaving its code unstyled.
+//
+// Sizing in `em` ties it to whichever caption it lands in. The selectors are
+// written long rather than as a bare `.article-figure__caption code` because
+// that would tie with `.article-body code` on specificity and be decided by
+// source order — a tie a later refactor would silently flip.
+.article-body .article-figure__caption code,
+.article-featured-image__caption code {
+  font-family: $mono;
+  font-size: 0.9em;
+  background: $code-bg;
+  padding: 1px 4px;
+}
+
+
 // --- AI transparency note ------------------------------------
 //
 // An editor's note, printed the way a broadsheet prints one: a hairline rule,
