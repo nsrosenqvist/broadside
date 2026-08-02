@@ -171,6 +171,47 @@
     }
   }
 
+  // Callouts (the `callout` shortcode). Deliberately not a tinted, rounded
+  // box: this is the editorial sidebar a newspaper sets beside a column, so
+  // it is a rule and a kicker and nothing else.
+  //
+  // It has to read as distinct from a blockquote sitting near it, and the two
+  // are told apart by weight rather than decoration — the quote keeps the
+  // accent rule and large italic serif, the callout takes a grey rule and
+  // body copy under a small sans kicker. A quote raises its voice; a callout
+  // lowers it.
+  .callout {
+    border-left: 2px solid $border;
+    padding-left: 1.5em;
+    margin: 1.5em 0;
+  }
+
+  .callout__kicker {
+    font-family: $sans;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: $text-tertiary;
+    margin-bottom: 6px;
+  }
+
+  // The accent is spent only where colour carries meaning rather than
+  // decoration. Five hues would make these the loudest thing on a page whose
+  // whole palette is one accent and a range of greys.
+  .callout--warning,
+  .callout--caution {
+    border-left-color: $accent;
+
+    .callout__kicker {
+      color: $accent;
+    }
+  }
+
+  .callout__body > :last-child {
+    margin-bottom: 0;
+  }
+
   // Code
   pre {
     background: $code-bg;

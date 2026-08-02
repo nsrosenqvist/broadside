@@ -1,0 +1,27 @@
+{#-
+  An editorial callout — the thing GitHub spells `> [!NOTE]`.
+
+    {% callout(kind="warning") %}
+    Markdown **works** in here, [links](/) and lists included.
+    {% end %}
+
+  Zola does not render GFM alerts (verified against 0.22.1: the `[!NOTE]`
+  marker comes through as literal text inside the blockquote, and there is no
+  [markdown] option to enable them), so this shortcode is the way to get one.
+
+  `kind` names the callout and, through `| title`, supplies its label: note,
+  tip, important, warning, caution. Anything else works too and gets its own
+  capitalised label, which means a typo shows up on the page as "Waring"
+  rather than silently rendering as a note.
+
+  `label` overrides that text when the standard word isn't the right one.
+
+  The argument is `label` rather than `title` on purpose: `title` is also a
+  Tera filter, and `title | default(value=kind | title)` is a sentence no one
+  should have to parse.
+-#}
+{%- set kind = kind | default(value="note") -%}
+<div class="callout callout--{{ kind }}">
+  <p class="callout__kicker">{{ label | default(value=kind | title) }}</p>
+  <div class="callout__body">{{ body | markdown | safe }}</div>
+</div>

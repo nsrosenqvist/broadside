@@ -82,6 +82,27 @@ All transitions use `ease` timing, 150–300ms range.
 - Author falls back from `page.extra.author` → `config.extra.author`
 - Syntax highlighting requires `highlight_theme = "css"` in `config.toml` so that dark mode token colors work
 
+## Callouts
+
+`templates/shortcodes/callout.html` exists because Zola does not render GFM
+alerts — verified against 0.22.1, where `> [!NOTE]` emits the marker as
+literal text inside the blockquote and no `[markdown]` option changes it. If a
+later Zola gains them, this shortcode can stay as the styled path and the raw
+syntax will simply start rendering as something plainer.
+
+The body is run through the `markdown` filter, so callouts take lists, links
+and code. The argument is `label` rather than `title` because `title` is also
+a Tera filter and the two collide unreadably in one expression. An unknown
+`kind` is not an error: it gets its own capitalised label, which surfaces a
+typo on the page instead of silently rendering a note.
+
+Only `warning` and `caution` take the accent. Giving all five their own colour
+was considered and rejected — the palette is one accent and a range of greys,
+and five hues would make callouts the loudest thing on the page. A callout
+also has to stay distinguishable from a blockquote near it; they are told
+apart by weight rather than decoration, so don't give the callout an accent
+rule or italic serif.
+
 ## AI transparency
 
 The user-facing contract is in the README; this is what an editor of the

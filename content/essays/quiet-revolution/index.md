@@ -29,7 +29,11 @@ Consider the humble build system. For decades, the question was speed: how quick
 
 This is not a theoretical concern. Supply chain attacks have moved from the realm of nation-state espionage to everyday reality[^1]. The tools that address this problem — reproducible builds, signed provenance, content-addressable storage — are not flashy. They do not trend on social media. But they are quietly reshaping the foundation on which everything else rests.
 
-### Provenance as a first-class concept
+{% callout(kind="note") %}
+Callouts are a shortcode rather than GFM `> [!NOTE]` syntax, which Zola does not render. Markdown **works** inside them.
+{% end %}
+
+## Provenance as a first-class concept
 
 The idea is deceptively simple: every artifact should carry a verifiable record of how it was created[^2]. Not just a version number, but a cryptographic chain linking binary to source to build environment.
 

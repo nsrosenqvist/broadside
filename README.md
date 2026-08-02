@@ -186,6 +186,25 @@ verification_links = [
 
 Each URL is rendered as `<link rel="me" href="...">` in the page head. Then add your site URL to your Mastodon profile's "Profile metadata" fields — Mastodon will follow the link, find the matching `rel="me"` tag, and show a green verification badge.
 
+## Callouts
+
+Zola does not render GitHub's `> [!NOTE]` alert syntax — the marker comes through as literal text inside an ordinary blockquote, and there is no `[markdown]` option to turn it on. The theme ships a shortcode instead:
+
+```jinja
+{% callout(kind="warning") %}
+Markdown **works** in here, with [links](/), `code` and lists.
+{% end %}
+```
+
+| Argument | Required | Description |
+|---|---|---|
+| `kind` | No | `note` (the default), `tip`, `important`, `warning`, or `caution`. Sets the CSS modifier and, capitalised, the label |
+| `label` | No | Replaces the label text when the standard word isn't the right one |
+
+Any other `kind` also works and gets its own capitalised label, so a typo appears on the page as "Waring" rather than silently rendering as a note.
+
+Callouts are set as an editorial sidebar — a rule and a small sans kicker over body copy — rather than a tinted box, so they sit beside a blockquote without competing with it. `warning` and `caution` take the accent colour; the rest stay grey, on the principle that colour should carry meaning rather than decorate. To give every kind its own hue, override `.callout--tip` and friends in your own Sass.
+
 ## AI transparency
 
 Optional. Declaring `[extra.ai_transparency]` at all is what switches it on; every string below has a built-in English default, so the block can be four lines or forty. With the block absent, the theme emits nothing — no markup, no feed change, no caption change.
