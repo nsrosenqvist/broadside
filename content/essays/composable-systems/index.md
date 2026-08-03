@@ -4,6 +4,7 @@ date = 2026-03-27
 description = "Why the boundaries you draw matter more than the code you write"
 
 [taxonomies]
+series = ["Foundations"]
 categories = ["Architecture"]
 
 [extra]

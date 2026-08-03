@@ -4,6 +4,7 @@ date = 2026-04-03
 description = "The unsexy stack choices that keep systems running for years"
 
 [taxonomies]
+series = ["Foundations"]
 categories = ["Engineering"]
 
 [extra]

@@ -82,6 +82,33 @@ All transitions use `ease` timing, 150–300ms range.
 - Author falls back from `page.extra.author` → `config.extra.author`
 - Syntax highlighting requires `highlight_theme = "css"` in `config.toml` so that dark mode token colors work
 
+## Series
+
+A third taxonomy, `series`, read in `page.html` via `get_taxonomy(kind="series")`
+— which is why `page.taxonomies.series is defined` guards the whole block: a
+site that never declares the taxonomy must never reach that call. The topics
+row iterates `categories` and `tags` by name, so `series` does not leak into it.
+
+Three details are easy to get wrong:
+
+- **Taxonomy pages arrive newest-first.** `reverse` is what turns that into
+  part-one-first, not a stylistic choice
+- **`sort(attribute="extra.series_index")` raises when any entry lacks the
+  attribute**, so the count of entries that have one must equal the total
+  before sorting. A partly-numbered series deliberately falls back to date
+  order rather than failing the build — the safe failure is a sensible order,
+  not a broken site, though it does mean a typo'd key goes unreported
+- **The summary states the position, so it has to be known before the list
+  renders.** Hence the `set_global` counting pass. The number shown is the
+  position in the ordered list, never the author's `series_index` key, which
+  may start anywhere
+
+Rendered between the featured image and the body on purpose: the header
+already carries a kicker, headline, subtitle, metadata rule and topics row,
+and this is one more thing to read before the article starts. Collapsed by
+default, and a `<details>` rather than scripted markup for the same reason as
+the header's Subscribe control.
+
 ## Callouts
 
 `templates/shortcodes/callout.html` exists because Zola does not render GFM

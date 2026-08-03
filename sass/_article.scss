@@ -373,6 +373,88 @@
 }
 
 
+// --- Series navigation ----------------------------------------
+//
+// A <details> rather than scripted markup, for the same reason the header's
+// Subscribe control is one: it opens, closes and takes keyboard focus with JS
+// off. Collapsed by default — a reader who arrived for this article should
+// not have to scroll past a table of contents for a different one.
+//
+// Framed by rules above and below rather than by a box, so it reads as a band
+// of editorial furniture between the image and the prose.
+.series {
+  margin-bottom: 32px;
+  padding: 10px 0;
+  border-top: 1px solid $border;
+  border-bottom: 1px solid $border;
+}
+
+.series__summary {
+  font-family: $sans;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: $text-tertiary;
+  cursor: pointer;
+  list-style: none; // hides the default disclosure triangle
+  transition: color $transition-fast;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  // The marker is drawn here instead, so it can be a typographic mark in the
+  // theme's own voice and rotate rather than swap glyphs.
+  &::before {
+    content: '\203A'; // ›
+    display: inline-block;
+    margin-right: 8px;
+    transition: transform $transition-base;
+  }
+
+  &:hover {
+    color: $text-primary;
+  }
+}
+
+.series[open] .series__summary::before {
+  transform: rotate(90deg);
+}
+
+.series__list {
+  margin: 12px 0 4px;
+  padding-left: 1.2em;
+  font-family: $body-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.series__item {
+  margin-bottom: 4px;
+  color: $text-secondary;
+
+  a {
+    color: $text-secondary;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 2px;
+    transition: color $transition-fast, text-decoration-color $transition-base;
+
+    &:hover {
+      color: $text-primary;
+      text-decoration-color: $text-primary;
+    }
+  }
+}
+
+// The entry you are reading is not a link, so it needs to look like the one
+// you are already at rather than like a dead link.
+.series__item--current {
+  color: $text-primary;
+  font-style: italic;
+}
+
+
 // --- Inline code inside captions ------------------------------
 //
 // Captions take inline markdown, and naming a type or a flag in one is the

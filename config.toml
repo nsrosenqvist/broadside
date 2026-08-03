@@ -27,6 +27,11 @@ feed = true
 [[taxonomies]]
 name = "tags"
 
+# Series membership. Leave feed off — a per-series feed would put every
+# series in the header's Subscribe menu.
+[[taxonomies]]
+name = "series"
+
 [extra]
 author = "Elena Larsson"
 # author_url = "https://example.com/about"

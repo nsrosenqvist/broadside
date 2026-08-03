@@ -16,6 +16,8 @@ A clean, newspaper-inspired Zola theme. Typography-first, restrained, and confid
   Subscribe dropdown in the header
 - **Category and tag taxonomies** with listing pages — one primary category
   per post as the kicker above the headline, tags for everything else
+- **Series** support — a collapsed list of every entry, shown on each post in
+  the series
 - **Previous / Next** post navigation
 - **OpenGraph and Schema.org** support for improved SEO and social sharing
 - **AI transparency labelling** — an optional per-post provenance label in the
@@ -69,6 +71,11 @@ feed = true
 
 [[taxonomies]]
 name = "tags"
+
+# Optional. Declare it to group posts into series; see below. Leave feed off
+# unless you want every series listed in the header's Subscribe menu.
+[[taxonomies]]
+name = "series"
 
 [extra]
 # Default author name shown on posts without a per-post author
@@ -139,6 +146,8 @@ ai_image = "generated"
 | `[extra] image` | No | Featured image filename (co-located with the post). Cropped to 3:2 in the homepage grid; full-bleed at its natural ratio on the article page and as the featured post |
 | `[extra] image_caption` | No | Caption displayed below the featured image. Takes inline markdown |
 | `[extra] og_image` | No | Override the OpenGraph/Twitter image (falls back to `image`, then `default_og_image`) |
+| `[taxonomies] series` | No | The series this post belongs to. Only the first is used |
+| `[extra] series_index` | No | Explicit position in the series. Only honoured when *every* entry in that series has one |
 | `[extra] ai_text` | No | AI provenance of the article's text: `none`, `assisted`, `edited`, or `generated` (falls back to `default_text`). See [AI transparency](#ai-transparency) |
 | `[extra] ai_note` | No | Replaces the site-wide sentence in this post's disclosure with one written for it. The label still comes from `ai_text` |
 | `[extra] ai_image` | No | AI provenance of the article's imagery as a whole: `generated` or `edited` |
@@ -185,6 +194,32 @@ verification_links = [
 ```
 
 Each URL is rendered as `<link rel="me" href="...">` in the page head. Then add your site URL to your Mastodon profile's "Profile metadata" fields — Mastodon will follow the link, find the matching `rel="me"` tag, and show a green verification badge.
+
+## Series
+
+Declare a `series` taxonomy and give posts a term:
+
+```toml
+[taxonomies]
+series = ["Building a compiler"]
+```
+
+Every post in a series with more than one entry shows a collapsed `<details>` between the featured image and the body, summarising as `Part 2 of 5 · Building a compiler`. Expanding lists all entries in reading order, with the one you are reading marked and unlinked. A series of one renders nothing — there is no navigation to offer.
+
+It's a `<details>`, so it opens, closes and takes keyboard focus with JavaScript disabled.
+
+### Ordering
+
+By default entries run oldest first, which is publication order. When that isn't reading order, number them:
+
+```toml
+[extra]
+series_index = 3
+```
+
+The numbering is honoured only when **every** entry in the series carries a `series_index` — a partly-numbered series falls back to date order rather than guessing. The number shown to the reader is the position in the list, not your key, so you can start at 0 or leave gaps.
+
+Only the first series a post lists is used, mirroring the rule that only the first category becomes the kicker.
 
 ## Callouts
 

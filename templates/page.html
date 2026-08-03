@@ -154,6 +154,62 @@
   </figure>
   {% endif %}
 
+  {# --- Series navigation ---
+    Sits between the featured image and the body rather than up in the header:
+    the header already carries a kicker, headline, subtitle, metadata rule and
+    topics row, and this is one more thing to read before the article starts.
+    Here it reads as the last piece of context before the prose.
+
+    Only the *first* series a post lists is used, mirroring the rule that only
+    the first category becomes the kicker. Sites that don't declare a `series`
+    taxonomy never reach `get_taxonomy`, so the guard is load-bearing.
+  #}
+  {% if page.taxonomies.series is defined and page.taxonomies.series | length > 0 %}
+    {% set series_name = page.taxonomies.series | first %}
+    {% set series_tax = get_taxonomy(kind="series") %}
+    {% for term in series_tax.items %}
+      {% if term.name == series_name and term.pages | length > 1 %}
+        {# Ordering: an explicit `series_index` on *every* entry wins, because
+           publication order and reading order are not always the same thing.
+           Sorting a set where only some entries carry the attribute raises in
+           Tera, so the count has to match exactly; a partly-numbered series
+           falls back to date order rather than failing the build. Taxonomy
+           pages arrive newest-first, so `reverse` is what makes date order
+           read as part one first. #}
+        {% set numbered = term.pages | filter(attribute="extra.series_index") %}
+        {% if numbered | length == term.pages | length %}
+          {% set entries = term.pages | sort(attribute="extra.series_index") %}
+        {% else %}
+          {% set entries = term.pages | reverse %}
+        {% endif %}
+        {# The summary has to state the position, which means knowing it before
+           the list is rendered — hence the counting pass. `series_index` is the
+           author's key and may start anywhere, so the number shown is the
+           position in the ordered list, not the key itself. #}
+        {% set_global series_pos = 0 %}
+        {% for entry in entries %}
+          {% if entry.permalink == page.permalink %}{% set_global series_pos = loop.index %}{% endif %}
+        {% endfor %}
+        <details class="series">
+          <summary class="series__summary">
+            {%- if series_pos > 0 %}Part {{ series_pos }} of {{ entries | length }}
+            <span class="meta-separator">&middot;</span>
+            {%- endif %}{{ term.name }}
+          </summary>
+          <ol class="series__list">
+            {% for entry in entries %}
+            {% if entry.permalink == page.permalink %}
+            <li class="series__item series__item--current" aria-current="page">{{ entry.title }}</li>
+            {% else %}
+            <li class="series__item"><a href="{{ entry.permalink }}">{{ entry.title }}</a></li>
+            {% endif %}
+            {% endfor %}
+          </ol>
+        </details>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
   {# --- Article body --- #}
   <div class="article-body">
     {{ page.content | safe }}
