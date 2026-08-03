@@ -433,16 +433,18 @@
   margin-bottom: 4px;
   color: $text-secondary;
 
+  // The same treatment body links get. This block sits outside .article-body,
+  // so it has to be stated rather than inherited — and a list of links that
+  // doesn't look like the links in the prose beside it reads as inert text.
   a {
-    color: $text-secondary;
+    color: $accent;
     text-decoration: underline;
     text-decoration-color: transparent;
     text-underline-offset: 2px;
-    transition: color $transition-fast, text-decoration-color $transition-base;
+    transition: text-decoration-color $transition-base;
 
     &:hover {
-      color: $text-primary;
-      text-decoration-color: $text-primary;
+      text-decoration-color: $accent;
     }
   }
 }
