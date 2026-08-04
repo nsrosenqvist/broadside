@@ -161,7 +161,8 @@ The theme generates OpenGraph, Twitter Card, and Schema.org JSON-LD metadata aut
 
 | Key | Description |
 |---|---|
-| `default_og_image` | Fallback image for social cards when a post has no featured image. Path relative to `static/`. |
+| `default_og_image` | Fallback image for social cards on pages with no image of their own. Path relative to `static/`. |
+| `og_card` | Filename of a per-post generated card, e.g. `"og.png"`. When set, posts without an explicit `og_image` point at `<permalink>/<og_card>` instead of falling back to their featured image. See [Generated social cards](#generated-social-cards). |
 | `twitter_handle` | Your Twitter/X handle (e.g. `"@yourhandle"`). Rendered as `twitter:site`. |
 | `author_url` | URL for the author, used in the JSON-LD `Person` schema. |
 | `publisher_logo` | Site logo for the JSON-LD `Organization` schema. Path relative to `static/`. |
@@ -172,8 +173,72 @@ The theme generates OpenGraph, Twitter Card, and Schema.org JSON-LD metadata aut
 The image used in `og:image` and `twitter:image` is resolved in this order:
 
 1. `page.extra.og_image` — explicit social card override
-2. `page.extra.image` — the post's featured image
-3. `config.extra.default_og_image` — site-wide fallback
+2. `config.extra.og_card` — the generated per-post card, if configured
+3. `page.extra.image` — the post's featured image
+4. `config.extra.default_og_image` — site-wide fallback
+
+Step 2 sits above the featured image deliberately. A hero is composed for the top of an article at whatever ratio suits it; a social card is 1200×630 and gets centre-cropped to that by every platform, so a site that generates real cards should never fall back to a crop of a hero. Sites that set no `og_card` keep the featured image as the fallback, which still beats one site-wide picture on every post.
+
+### Generated social cards
+
+The theme ships a script that renders a typographic 1200×630 card per post, matching the theme's palette and fonts:
+
+```bash
+npm install --save-dev playwright-core
+npx playwright install chromium
+```
+
+```toml
+[extra]
+og_card = "og.png"                  # per-post cards at <permalink>/og.png
+default_og_image = "og-default.png" # site-wide card for the rest
+```
+
+Then, from your site root, after every build:
+
+```bash
+zola build
+node themes/broadside/scripts/build-og-images.mjs
+```
+
+It scans `public/` for pages whose `og:image` ends in your `og_card` filename, reads each page's title, date, category and author from the JSON-LD the theme already emits, and writes the card next to that page's `index.html`. It also renders `public/og-default.png` from the site's own name and description. Nothing in the script needs editing for your site — it takes everything from the built output.
+
+Cards are cached by a hash of their rendered HTML in `.og-cache/`, so a rebuild only launches Chromium for posts whose metadata actually changed. Persist that directory between CI runs and most builds skip the browser entirely. Add it to your `.gitignore`.
+
+| Variable | Effect |
+|---|---|
+| `OG_IMAGE_SKIP=1` | Skip generation entirely, for quick local builds |
+| `OG_CARD_NAME` | Card filename, if `og_card` is not `og.png` |
+| `OG_LOCALE` | Date locale (default `en-US`) |
+| `SITE_ROOT` | Site root, if it isn't the working directory |
+
+To restyle the cards, edit the four palette constants and the `shell()` template at the top of the script.
+
+### Changing the fallback chain
+
+If that order isn't what you want, override the `opengraph` block and set `og_image` yourself. The `twitter_card` and `jsonld` blocks reuse the variable rather than deriving it again, so one override moves all three tags — `opengraph` renders first, which is what makes that work:
+
+```jinja
+{% extends "broadside/templates/page.html" %}
+
+{% block opengraph %}
+{# Whatever rule you want. This one never falls back to the featured image. #}
+{% if page.extra.og_image is defined %}
+  {% set og_image = page.permalink ~ page.extra.og_image %}
+{% else %}
+  {% set og_image = page.permalink ~ "og.png" %}
+{% endif %}
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ page.title }}">
+<meta property="og:description" content="{{ page.description | default(value='') }}">
+<meta property="og:url" content="{{ page.permalink }}">
+<meta property="og:image" content="{{ og_image }}">
+{% if page.date %}<meta property="article:published_time" content="{{ page.date }}">{% endif %}
+{% if page.updated %}<meta property="article:modified_time" content="{{ page.updated }}">{% endif %}
+{% endblock opengraph %}
+```
+
+Calling `{{ super() }}` instead of writing the tags does **not** work: the parent block re-derives `og_image` before emitting anything, so it overwrites whatever you set. Copy the tags you need out of the theme's `page.html` — you own the drift from that point, so check them when upgrading.
 
 ### Generated meta tags
 

@@ -5,9 +5,19 @@
 {% block description %}{{ page.description | default(value='') }}{% endblock description %}
 
 {% block opengraph %}
+{#
+  Social card resolution. `og_card` sits above the featured image on purpose:
+  a hero is composed for the top of an article at whatever ratio suits it,
+  while a social card is 1200x630 and gets centre-cropped to that by every
+  platform — so a site generating real cards should never fall back to a crop
+  of a hero. Sites that set no `og_card` keep the featured image as the
+  fallback, which still beats one site-wide picture on every post.
+#}
 {% set og_image = false %}
 {% if page.extra.og_image is defined %}
   {% set og_image = page.permalink ~ page.extra.og_image %}
+{% elif config.extra.og_card is defined %}
+  {% set og_image = page.permalink ~ config.extra.og_card %}
 {% elif page.extra.image is defined %}
   {% set og_image = page.permalink ~ page.extra.image %}
 {% elif config.extra.default_og_image is defined %}

@@ -82,6 +82,28 @@ All transitions use `ease` timing, 150–300ms range.
 - Author falls back from `page.extra.author` → `config.extra.author`
 - Syntax highlighting requires `highlight_theme = "css"` in `config.toml` so that dark mode token colors work
 
+## Social cards
+
+`og_image` is derived **once**, at the top of `page.html`'s `opengraph` block;
+`twitter_card` and `jsonld` read that variable rather than recomputing it. That
+is why a site can retarget all three tags by overriding one block — and why
+`opengraph` must keep rendering before the other two in `base.html`. Moving it
+would silently blank the other two tags.
+
+The chain puts `config.extra.og_card` above `page.extra.image` on purpose: a
+generated card is 1200x630 and a featured image is whatever ratio suited the
+top of the article, so a site producing real cards must never fall back to a
+centre-crop of a hero.
+
+`scripts/build-og-images.mjs` renders those cards. It is deliberately free of
+site-specific configuration — name, description and host come from the WebSite
+JSON-LD the theme emits on every page, and per-post data from each page's own
+Article JSON-LD. If you change either schema, check the script still finds what
+it reads. It resolves `playwright-core` from the *site* root via
+`createRequire` rather than importing it, because a plain import resolves from
+the theme directory and walks away from the site entirely when the theme is
+symlinked rather than vendored.
+
 ## Series
 
 A third taxonomy, `series`, read in `page.html` via `get_taxonomy(kind="series")`
