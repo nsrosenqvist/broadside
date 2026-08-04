@@ -201,7 +201,7 @@ zola build
 node themes/broadside/scripts/build-og-images.mjs
 ```
 
-It scans `public/` for pages whose `og:image` ends in your `og_card` filename, reads each page's title, date, category and author from the JSON-LD the theme already emits, and writes the card next to that page's `index.html`. It also renders `public/og-default.png` from the site's own name and description. Nothing in the script needs editing for your site — it takes everything from the built output.
+It scans `public/` for pages whose `og:image` ends in your `og_card` filename, reads each page's title, date, category and author from the JSON-LD the theme already emits, and writes the card next to that page's `index.html`. It also renders `public/og-default.png` from the site's own name and description — that one card has no post to derive from, so `OG_SITE_KICKER` and `OG_SITE_TAGLINE` are there for when a `<meta>` description reads awkwardly under a headline that already states the site's name. Nothing in the script needs editing for your site — it takes everything from the built output.
 
 Cards are cached by a hash of their rendered HTML in `.og-cache/`, so a rebuild only launches Chromium for posts whose metadata actually changed. Persist that directory between CI runs and most builds skip the browser entirely. Add it to your `.gitignore`.
 
@@ -210,6 +210,8 @@ Cards are cached by a hash of their rendered HTML in `.og-cache/`, so a rebuild 
 | `OG_IMAGE_SKIP=1` | Skip generation entirely, for quick local builds |
 | `OG_CARD_NAME` | Card filename, if `og_card` is not `og.png` |
 | `OG_LOCALE` | Date locale (default `en-US`) |
+| `OG_SITE_KICKER` | Kicker on the site-wide card (default: none) |
+| `OG_SITE_TAGLINE` | Tagline on the site-wide card (default: the site description) |
 | `SITE_ROOT` | Site root, if it isn't the working directory |
 
 To restyle the cards, edit the four palette constants and the `shell()` template at the top of the script.

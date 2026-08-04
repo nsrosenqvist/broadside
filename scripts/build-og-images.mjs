@@ -27,6 +27,8 @@
 //   OG_IMAGE_SKIP=1   skip generation entirely (quick local builds)
 //   OG_CARD_NAME      card filename, if you set `og_card` to something else
 //   OG_LOCALE         date locale (default en-US)
+//   OG_SITE_KICKER    kicker on the site-wide card (default: none)
+//   OG_SITE_TAGLINE   tagline on the site-wide card (default: site description)
 //   SITE_ROOT         site root, if not the current working directory
 
 import {
@@ -43,27 +45,14 @@ import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
 
 const ROOT = process.env.SITE_ROOT ?? process.cwd();
-
-// Resolve playwright from the *site*, not from this file. The script lives
-// inside the theme, so a plain import would look in themes/broadside/ and
-// walk up from there — which lands outside the site entirely when the theme
-// is symlinked rather than vendored as a submodule.
-let chromium;
-try {
-  chromium = createRequire(join(ROOT, "package.json"))(
-    "playwright-core",
-  ).chromium;
-} catch {
-  console.error(
-    "og: playwright-core not found. Install it in your site:\n" +
-      "      npm install --save-dev playwright-core\n" +
-      "      npx playwright install chromium",
-  );
-  process.exit(1);
-}
 const DIST = join(ROOT, "public");
 const CARD_NAME = process.env.OG_CARD_NAME ?? "og.png";
 const LOCALE = process.env.OG_LOCALE ?? "en-US";
+// The site card is the one card with no post to derive from. Its kicker has no
+// natural source at all, and the site description is written for a <meta> tag,
+// which often repeats the site name the card already sets in 84px type.
+const SITE_KICKER = process.env.OG_SITE_KICKER ?? "";
+const SITE_TAGLINE = process.env.OG_SITE_TAGLINE ?? null;
 
 // Content-addressed card cache: keyed by the sha256 of each card's rendered
 // HTML, so a card only re-renders when its data or this template changes.
@@ -253,13 +242,31 @@ function postCard({ title, date, category, author }) {
 
 function defaultCard() {
   return shell(`
-    <div class="category">&nbsp;</div>
+    <div class="category">${SITE_KICKER ? escape(SITE_KICKER) : "&nbsp;"}</div>
     <div>
       <div class="headline" style="font-size:84px; line-height:1.1; margin-bottom:28px">${escape(SITE.name)}</div>
-      <div class="tagline">${escape(SITE.description)}</div>
+      <div class="tagline">${escape(SITE_TAGLINE ?? SITE.description)}</div>
     </div>
     <div class="meta"><span>${escape(SITE.host)}</span></div>
   `);
+}
+
+// Resolved lazily, and from the *site* rather than from this file: a plain
+// import would resolve relative to themes/broadside/ and walk out of the site
+// entirely when the theme is symlinked rather than vendored. Lazily, because a
+// run that skips generation or hits the cache for every card never needs a
+// browser at all — and shouldn't fail for want of one.
+function loadChromium() {
+  try {
+    return createRequire(join(ROOT, "package.json"))("playwright-core").chromium;
+  } catch {
+    console.error(
+      "og: playwright-core not found. Install it in your site:\n" +
+        "      npm install --save-dev playwright-core\n" +
+        "      npx playwright install chromium",
+    );
+    process.exit(1);
+  }
 }
 
 // --- Render -----------------------------------------------------------------
@@ -281,7 +288,7 @@ const cards = [
 const misses = cards.filter((c) => !existsSync(c.cached));
 
 if (misses.length > 0) {
-  const browser = await chromium.launch();
+  const browser = await loadChromium().launch();
   try {
     const context = await browser.newContext({
       viewport: { width: 1200, height: 630 },
