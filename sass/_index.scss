@@ -13,6 +13,10 @@
 }
 
 .featured-post__image-wrap {
+  // The wrap is an `<a>`, so it needs blockifying before a vertical margin
+  // means anything. Its counterpart in the grid gets this for free by being a
+  // grid item, which is why only this one sat flush against its kicker.
+  display: block;
   margin-bottom: 20px;
 }
 
