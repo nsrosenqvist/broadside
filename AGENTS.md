@@ -152,6 +152,60 @@ also has to stay distinguishable from a blockquote near it; they are told
 apart by weight rather than decoration, so don't give the callout an accent
 rule or italic serif.
 
+## Diagrams
+
+`scripts/build-diagrams.mjs` rewrites ```mermaid fences in `public/` into
+inline SVG after `zola build`. It is modelled on `build-og-images.mjs` and
+shares its conventions — site-root `createRequire`, a content-addressed cache,
+a prune pass, a skip variable — so a change to one is usually worth making to
+the other.
+
+The fence needs no Zola configuration: giallo ships a mermaid syntax, so
+```mermaid passes `error_on_missing_language` and comes out as an ordinary
+code block tagged `data-lang="mermaid"`. That attribute is the hook the script
+matches on; the source is recovered by stripping the per-token markup, which
+is exact because the line breaks are real newlines outside the spans. The
+regex also accepts `class="language-mermaid"` so the script still works on a
+site with highlighting turned off.
+
+Five things in here will look like mistakes and are not:
+
+- **`htmlLabels: false`, set at the root *and* under `flowchart`.** Mermaid's
+  default label is `<foreignObject><div><p>`, which is styled by the host page
+  once the SVG is inlined — `.article-body p` margins land inside the node box
+  and shove the text out of it. SVG `<text>` is self-contained and survives the
+  move. The cost is that Mermaid's `#35;`-style entity codes no longer decode,
+  since they are HTML escapes; the README tells authors to write the character
+  literally.
+- **Every diagram is rendered twice, once per scheme.** Mermaid writes concrete
+  colours into the SVG and derives shades from them with a colour library, so a
+  `var(--bg)` cannot be passed through `themeVariables`. Two copies of a
+  diagram cost a few kilobytes; the swap is `display: none` in `_article.scss`,
+  which keeps the inactive copy out of the accessibility tree so a screen
+  reader announces the diagram once.
+- **The palette is parsed out of the built `style.css`, not hardcoded.** The
+  custom properties are the theme's design tokens, so a site that retunes them
+  gets matching diagrams for free. Blocks outside a `prefers-color-scheme`
+  media query seed both palettes, since a token declared once has the same
+  value in either scheme. There is a hardcoded fallback if the stylesheet is
+  missing or shaped unexpectedly — that path is what a site with a heavily
+  rewritten stylesheet lands on, so keep it in step with `_variables.scss`.
+- **The webfont is loaded before `mermaid.render` is called.** Mermaid measures
+  label text to size the box around it; render against a fallback face and
+  every box comes out the wrong width for the font the page will actually use.
+- **A diagram that doesn't parse exits 1.** Loud on purpose, matching
+  `error_on_missing_language`: falling back to the source text would ship the
+  mistake looking like a decision.
+
+The cache key is the source, the palette, the render config and the Mermaid
+version. `RENDER_VERSION` is the manual escape hatch for changing something the
+key doesn't already cover.
+
+`useMaxWidth` is left on, so a small diagram keeps its natural width rather
+than being blown up to the column; the script only rewrites the inline
+`max-width` to `min(100%, <natural>)` so a large one scales down instead of
+running into the margin.
+
 ## AI transparency
 
 The user-facing contract is in the README; this is what an editor of the

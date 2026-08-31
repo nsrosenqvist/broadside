@@ -41,3 +41,18 @@ Natural seams exist where:
 3. **Failure domains are distinct.** A failure here should not cascade there.
 
 The result is not microservices. It is not a monolith. It is a system whose boundaries reflect reality rather than ideology.
+
+Drawn out, a seam is the place where one side can be replaced without the
+other noticing:
+
+```mermaid
+graph LR
+  orders["Orders"] -->|"events"| ledger["Ledger"]
+  orders -->|"events"| search["Search index"]
+  ledger --> reports["Reporting"]
+  search --> reports
+```
+
+Both sides of that seam change on their own schedule, which is the whole
+argument.
+

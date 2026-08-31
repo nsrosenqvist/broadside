@@ -18,6 +18,8 @@ A clean, newspaper-inspired Zola theme. Typography-first, restrained, and confid
   per post as the kicker above the headline, tags for everything else
 - **Series** support — a collapsed list of every entry, shown on each post in
   the series
+- **Mermaid diagrams** prerendered to inline SVG at build time — no client-side
+  JavaScript, drawn in the theme's palette in both colour schemes
 - **Previous / Next** post navigation
 - **OpenGraph and Schema.org** support for improved SEO and social sharing
 - **AI transparency labelling** — an optional per-post provenance label in the
@@ -306,6 +308,73 @@ Markdown **works** in here, with [links](/), `code` and lists.
 Any other `kind` also works and gets its own capitalised label, so a typo appears on the page as "Waring" rather than silently rendering as a note.
 
 Callouts are set as an editorial sidebar — a rule, a small sans kicker, and body text a step down in emphasis — rather than a tinted box, so they sit beside a blockquote without competing with it. `warning` and `caution` take the accent colour; the rest stay grey, on the principle that colour should carry meaning rather than decorate. To give every kind its own hue, override `.callout--tip` and friends in your own Sass.
+
+## Diagrams
+
+Write a [Mermaid](https://mermaid.js.org) diagram as an ordinary fenced code block:
+
+````markdown
+```mermaid
+graph TD
+  spec["openapi.json"] --> client["a typed client"]
+  client --> app["your handlers"]
+```
+````
+
+A build script turns each fence into inline SVG, so what ships is the finished
+drawing. There is no client-side runtime: a diagram costs a couple of kilobytes
+instead of the ~1 MB of JavaScript Mermaid weighs in the browser, it renders
+with JavaScript disabled, and it cannot shift the layout after paint.
+
+```bash
+npm install --save-dev mermaid playwright-core
+npx playwright install chromium
+```
+
+Then, from your site root, after every build:
+
+```bash
+zola build
+node themes/broadside/scripts/build-diagrams.mjs
+```
+
+Colours come from your compiled `style.css`, so a retuned palette gives
+retuned diagrams with nothing to configure. Each diagram is rendered twice,
+once per colour scheme — Mermaid bakes concrete colours into its SVG and
+derives shades from them, so a CSS custom property cannot be handed to it —
+and the stylesheet swaps the two under `prefers-color-scheme`. The result is
+deliberately monochrome, drawn in the same greys and thin rules as the rest of
+the page; a diagram that needs colour should ask for it with Mermaid's own
+`classDef` and `style` statements.
+
+| Variable | Effect |
+|---|---|
+| `MERMAID_SKIP=1` | Skip rendering entirely, for quick local builds |
+| `MERMAID_FONT` | Label font family (default: the theme's Inter stack) |
+| `SITE_ROOT` | Site root, if it isn't the working directory |
+
+Rendered diagrams are cached in `.mermaid-cache/` by a hash of the source, the
+palette and the Mermaid version, so a rebuild only launches Chromium for
+diagrams that actually changed. Persist that directory between CI runs and most
+builds skip the browser entirely. Add it to your `.gitignore`.
+
+Three things worth knowing:
+
+- **`zola serve` does not render diagrams.** Zola serves HTML from memory, so
+  there is no built file for a post-build step to rewrite. A fence shows as its
+  source text while you write, and as a diagram in `zola build` output — which
+  is also the no-JavaScript fallback. To see diagrams locally, build and serve
+  `public/` with any static server.
+- **A diagram that does not parse fails the build**, deliberately, the way an
+  unknown language in a fence does under `error_on_missing_language`. Shipping
+  the source text in its place would hide the mistake.
+- **Write special characters literally, not as Mermaid entity codes.** Labels
+  are rendered as SVG `<text>` rather than embedded HTML, so `#35;` arrives as
+  the literal string `&#35;` — write `#` and quote the label instead.
+
+Diagrams scale down to fit the text column and are centred in it; one wide
+enough to still overflow scrolls rather than being clipped, but is usually
+better split in two.
 
 ## AI transparency
 

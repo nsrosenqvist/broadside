@@ -289,6 +289,45 @@
     margin-top: 8px;
   }
 
+  // Mermaid diagrams, prerendered to inline SVG by
+  // scripts/build-diagrams.mjs. There is no client-side runtime: what ships
+  // is the finished drawing, so a diagram costs a couple of kilobytes and
+  // renders with JavaScript off.
+  //
+  // Mermaid bakes concrete colours into the SVG — it derives shades from
+  // them, so a custom property can't be handed to it — which is why the
+  // script renders each diagram once per scheme and the swap happens here.
+  // `display: none` keeps the inactive copy out of the accessibility tree as
+  // well as off the page, so the diagram is announced once, not twice.
+  .diagram {
+    margin: 1.5em 0;
+    // A safety net rather than the normal case: the SVG carries
+    // `max-width: min(100%, <natural width>)`, so it scales down to the
+    // column instead of overflowing it. A diagram wide enough to still
+    // overflow scrolls rather than being clipped.
+    overflow-x: auto;
+
+    svg {
+      display: block;
+      margin: 0 auto;
+      height: auto;
+    }
+  }
+
+  .diagram__scheme--dark {
+    display: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .diagram__scheme--light {
+      display: none;
+    }
+
+    .diagram__scheme--dark {
+      display: block;
+    }
+  }
+
   // Tables
   table {
     width: 100%;
