@@ -40,6 +40,162 @@ Then set the theme in your `config.toml`:
 theme = "broadside"
 ```
 
+That is the whole installation. The theme's build-time features — social cards
+and diagrams — need no dependencies in your own `package.json`.
+
+## Building
+
+Two of the theme's features run after Zola has produced `public/`: [social
+cards](#generated-social-cards) and [diagrams](#diagrams). Build with
+
+```bash
+node themes/broadside/scripts/broadside.mjs build
+```
+
+instead of `zola build`, and both run in order. Anything after `build` is
+passed to Zola untouched, so `--drafts`, `--base-url` and the rest work as
+they always did:
+
+```bash
+node themes/broadside/scripts/broadside.mjs build --drafts --base-url http://localhost:8080
+```
+
+In a `package.json`, that is the one line a site needs:
+
+```json
+{
+  "scripts": {
+    "build": "node themes/broadside/scripts/broadside.mjs build"
+  }
+}
+```
+
+| Command | What it does |
+|---|---|
+| `build [zola args]` | `zola build`, then diagrams, then og cards |
+| `diagrams` | Just the diagram pass, over an existing build |
+| `og` | Just the og card pass, over an existing build |
+| `bootstrap [--with-deps]` | Install the build dependencies ahead of time |
+| `build --no-zola` | Skip `zola build`, if the site is built some other way |
+
+### Dependencies
+
+Rendering both cards and diagrams needs `mermaid`, `playwright-core` and a
+Chromium. Those are the *theme's* dependencies, declared in the theme's own
+`package.json` — a site does not list them, because a Git submodule is never
+reached by the site's `npm install`.
+
+They are installed into `themes/broadside/node_modules` the first time a build
+actually needs them, which means a fresh clone builds with no setup step. The
+install announces itself in the build log, and it happens once; afterwards
+builds are offline.
+
+If you would rather that never happen implicitly — a hermetic build, a CI job,
+an offline machine — install them ahead of time and set
+`BROADSIDE_NO_BOOTSTRAP=1`, which turns a missing dependency into an error with
+instructions instead of an install:
+
+```bash
+node themes/broadside/scripts/broadside.mjs bootstrap --with-deps
+BROADSIDE_NO_BOOTSTRAP=1 node themes/broadside/scripts/broadside.mjs build
+```
+
+`--with-deps` additionally installs the system libraries Chromium needs, which
+a bare CI image usually lacks. It runs a package manager as root, so the
+implicit bootstrap never passes it — that is a step you should choose.
+
+A site that already declares `mermaid` and `playwright-core` itself keeps
+working exactly as before: the theme resolves its own `node_modules` first and
+falls back to the site's. That fallback is permanent, not a migration path.
+
+### Deploying
+
+A complete GitHub Actions workflow, building the site and publishing it to
+GitHub Pages:
+
+```yaml
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  ZOLA_VERSION: 0.22.1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # The theme is a submodule; without this the build has no templates.
+          submodules: true
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Install Zola
+        run: |
+          curl -fsSL "https://github.com/getzola/zola/releases/download/v${ZOLA_VERSION}/zola-v${ZOLA_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
+            | tar -xz -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+
+      # The theme's build dependencies and Chromium. Cached together and keyed
+      # on the theme's lockfile, so a theme bump refreshes both.
+      - name: Cache theme build dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            themes/broadside/node_modules
+            ~/.cache/ms-playwright
+          key: broadside-deps-${{ hashFiles('themes/broadside/package-lock.json') }}
+
+      # Explicit rather than left to the build: --with-deps installs the system
+      # libraries Chromium needs on a bare runner, which should be a visible
+      # step rather than a side effect of building.
+      - name: Install theme build dependencies
+        run: node themes/broadside/scripts/broadside.mjs bootstrap --with-deps
+
+      # Rendered cards and diagrams are content-addressed, so only new or
+      # changed ones launch Chromium. The key is unique per commit so the
+      # updated cache is saved each run; restore-keys picks up the latest.
+      - name: Cache rendered images
+        uses: actions/cache@v5
+        with:
+          path: themes/broadside/.cache
+          key: broadside-render-${{ github.sha }}
+          restore-keys: broadside-render-
+
+      # Everything is installed above, so a missing dependency should fail here
+      # loudly rather than be quietly fetched mid-build.
+      - name: Build
+        run: node themes/broadside/scripts/broadside.mjs build
+        env:
+          BROADSIDE_NO_BOOTSTRAP: "1"
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+```
+
 ## Configuration
 
 Here is a sample `config.toml` with all settings the theme expects:
@@ -185,27 +341,22 @@ Step 2 sits above the featured image deliberately. A hero is composed for the to
 
 The theme ships a script that renders a typographic 1200×630 card per post, matching the theme's palette and fonts:
 
-```bash
-npm install --save-dev playwright-core
-npx playwright install chromium
-```
-
 ```toml
 [extra]
 og_card = "og.png"                  # per-post cards at <permalink>/og.png
 default_og_image = "og-default.png" # site-wide card for the rest
 ```
 
-Then, from your site root, after every build:
+Then build with `broadside.mjs build` (see [Building](#building)) — or, to run
+just this pass over an existing build:
 
 ```bash
-zola build
-node themes/broadside/scripts/build-og-images.mjs
+node themes/broadside/scripts/broadside.mjs og
 ```
 
 It scans `public/` for pages whose `og:image` ends in your `og_card` filename, reads each page's title, date, category and author from the JSON-LD the theme already emits, and writes the card next to that page's `index.html`. It also renders `public/og-default.png` from the site's own name and description — that one card has no post to derive from, so `OG_SITE_KICKER` and `OG_SITE_TAGLINE` are there for when a `<meta>` description reads awkwardly under a headline that already states the site's name. Nothing in the script needs editing for your site — it takes everything from the built output.
 
-Cards are cached by a hash of their rendered HTML in `.og-cache/`, so a rebuild only launches Chromium for posts whose metadata actually changed. Persist that directory between CI runs and most builds skip the browser entirely. Add it to your `.gitignore`.
+Cards are cached by a hash of their rendered HTML in `themes/broadside/.cache/og/`, so a rebuild only launches Chromium for posts whose metadata actually changed. The cache lives inside the theme, where the theme's own `.gitignore` covers it — there is nothing for your site to ignore. Persist that directory between CI runs and most builds skip the browser entirely.
 
 | Variable | Effect |
 |---|---|
@@ -214,6 +365,7 @@ Cards are cached by a hash of their rendered HTML in `.og-cache/`, so a rebuild 
 | `OG_LOCALE` | Date locale (default `en-US`) |
 | `OG_SITE_KICKER` | Kicker on the site-wide card (default: none) |
 | `OG_SITE_TAGLINE` | Tagline on the site-wide card (default: the site description) |
+| `OG_CACHE_DIR` | Cache location (default: `themes/broadside/.cache/og`) |
 | `SITE_ROOT` | Site root, if it isn't the working directory |
 
 To restyle the cards, edit the four palette constants and the `shell()` template at the top of the script.
@@ -326,16 +478,12 @@ drawing. There is no client-side runtime: a diagram costs a couple of kilobytes
 instead of the ~1 MB of JavaScript Mermaid weighs in the browser, it renders
 with JavaScript disabled, and it cannot shift the layout after paint.
 
-```bash
-npm install --save-dev mermaid playwright-core
-npx playwright install chromium
-```
-
-Then, from your site root, after every build:
+Nothing to configure — build with `broadside.mjs build` (see
+[Building](#building)) and diagrams are rendered. To run just this pass over an
+existing build:
 
 ```bash
-zola build
-node themes/broadside/scripts/build-diagrams.mjs
+node themes/broadside/scripts/broadside.mjs diagrams
 ```
 
 Colours come from your compiled `style.css`, so a retuned palette gives
@@ -351,12 +499,14 @@ the page; a diagram that needs colour should ask for it with Mermaid's own
 |---|---|
 | `MERMAID_SKIP=1` | Skip rendering entirely, for quick local builds |
 | `MERMAID_FONT` | Label font family (default: the theme's Inter stack) |
+| `MERMAID_CACHE_DIR` | Cache location (default: `themes/broadside/.cache/diagrams`) |
 | `SITE_ROOT` | Site root, if it isn't the working directory |
 
-Rendered diagrams are cached in `.mermaid-cache/` by a hash of the source, the
-palette and the Mermaid version, so a rebuild only launches Chromium for
-diagrams that actually changed. Persist that directory between CI runs and most
-builds skip the browser entirely. Add it to your `.gitignore`.
+Rendered diagrams are cached in `themes/broadside/.cache/diagrams/` by a hash
+of the source, the palette and the Mermaid version, so a rebuild only launches
+Chromium for diagrams that actually changed. The cache lives inside the theme,
+where the theme's own `.gitignore` covers it. Persist that directory between CI
+runs and most builds skip the browser entirely.
 
 Three things worth knowing:
 

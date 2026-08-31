@@ -18,6 +18,12 @@ This is a **standalone Zola theme repository**, not a full site. It gets pulled 
 - `screenshot.png` — Theme screenshot for the Zola gallery
 - `sass/` — `style.scss` is the entry point; it imports partials (`_variables.scss`, `_reset.scss`, `_layout.scss`, etc.). Design tokens live in `_variables.scss`.
 - `templates/` — Zola templates. `base.html` is the shell; all others extend it. `macros/` holds Tera macro modules, `shortcodes/` the shortcodes authors call from markdown, and `rss.xml` is a deliberate copy of Zola's built-in feed template (see below)
+- `scripts/` — Post-build renderers. `broadside.mjs` is the entry point a site
+  calls; `build-og-images.mjs` and `build-diagrams.mjs` do the work and stay
+  runnable on their own; `lib/deps.mjs` resolves and installs their
+  dependencies (see below)
+- `package.json` — The theme's *own* build dependencies, installed into
+  `themes/broadside/node_modules` on first use. Not a published npm package
 - `dev.sh` — Local dev server launcher (see below)
 - `README.md` — User-facing documentation
 
@@ -151,6 +157,38 @@ and five hues would make callouts the loudest thing on the page. A callout
 also has to stay distinguishable from a blockquote near it; they are told
 apart by weight rather than decoration, so don't give the callout an accent
 rule or italic serif.
+
+## Build scripts and their dependencies
+
+`scripts/broadside.mjs` is the single entry point a site calls; the two render
+scripts stay independently runnable. `scripts/lib/deps.mjs` is the only place
+that resolves or installs anything.
+
+The theme is a submodule, so its `package.json` is never reached by the site's
+own `npm install` — nothing descends into `themes/broadside`. Rather than
+making every site restate `mermaid` and `playwright-core` in its own manifest,
+the scripts install them into the theme on first use.
+
+- **Resolution is theme-first, then site root.** The site fallback is
+  permanent, not a migration step: every Broadside site predating the theme
+  manifest declares these itself and must keep working untouched.
+- **The bootstrap uses `npm`, not the site's package manager.** npm ships with
+  Node, and these are the theme's dependencies rather than part of the site's
+  graph. A plain `node_modules` here resolves the same whatever the site uses.
+- **`--with-deps` is never passed implicitly.** It runs a package manager as
+  root. `broadside.mjs bootstrap --with-deps` exists so that is a step someone
+  chooses; the README's example workflow calls it.
+- **`BROADSIDE_NO_BOOTSTRAP=1` turns every install into an error with
+  instructions.** CI sets it for the build after bootstrapping explicitly, so a
+  missing dependency fails loudly instead of being fetched mid-build.
+- **Caches live in `<theme>/.cache/`**, covered by the theme's own
+  `.gitignore`, so adding either feature costs a site no gitignore entry.
+  `OG_CACHE_DIR` and `MERMAID_CACHE_DIR` override.
+
+`zola serve` watches `themes/` recursively, so an installed `node_modules` is
+inside the watch tree. Measured at ~600 extra directory watches against a
+typical 524288 limit — not worth designing around, but it is why the caches are
+a single `.cache/` directory rather than several.
 
 ## Diagrams
 

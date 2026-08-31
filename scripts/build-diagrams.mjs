@@ -4,10 +4,13 @@
 //
 //   node themes/broadside/scripts/build-diagrams.mjs
 //
-// It needs `mermaid` and `playwright-core`, plus a Chromium:
+// Or, together with `zola build` and the og cards, as:
 //
-//   npm install --save-dev mermaid playwright-core
-//   npx playwright install chromium
+//   node themes/broadside/scripts/broadside.mjs build
+//
+// It needs `mermaid`, `playwright-core` and a Chromium. Those are the theme's
+// own dependencies and are installed into themes/broadside on first use, so a
+// site needs to declare nothing; see scripts/lib/deps.mjs.
 //
 // How it works:
 //   - Zola highlights a ```mermaid fence as an ordinary code block and tags it
@@ -28,9 +31,10 @@
 // runtime at all.
 //
 // Environment:
-//   MERMAID_SKIP=1   skip rendering entirely (quick local builds)
-//   MERMAID_FONT     label font family (default: the theme's Inter stack)
-//   SITE_ROOT        site root, if not the current working directory
+//   MERMAID_SKIP=1        skip rendering entirely (quick local builds)
+//   MERMAID_FONT          label font family (default: the theme's Inter stack)
+//   MERMAID_CACHE_DIR     cache location (default: <theme>/.cache/diagrams)
+//   SITE_ROOT             site root, if not the current working directory
 
 import {
   readFileSync,
@@ -43,7 +47,7 @@ import {
 } from "node:fs";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
-import { createRequire } from "node:module";
+import { cacheDir, ensureDeps, loadChromium, tryRequire, tryResolve } from "./lib/deps.mjs";
 
 const ROOT = process.env.SITE_ROOT ?? process.cwd();
 const DIST = join(ROOT, "public");
@@ -52,15 +56,14 @@ const FONT = process.env.MERMAID_FONT ?? "Inter, Helvetica Neue, Arial, sans-ser
 // Content-addressed cache: keyed by the sha256 of each diagram's source, the
 // palette it is rendered against and the mermaid version, so a diagram only
 // re-renders when one of those changes. Persist it across CI runs to skip
-// Chromium entirely on most builds.
-const CACHE = join(ROOT, ".mermaid-cache");
+// Chromium entirely on most builds. It lives inside the theme so a site needs
+// no gitignore entry for it.
+const CACHE = cacheDir("diagrams", process.env.MERMAID_CACHE_DIR);
 
 // Bump when the render options below change in a way that should invalidate
 // every cached diagram. The palette and mermaid version are already part of
 // the key and don't need this.
 const RENDER_VERSION = 1;
-
-const require = createRequire(join(ROOT, "package.json"));
 
 if (process.env.MERMAID_SKIP === "1") {
   console.log("MERMAID_SKIP=1 — skipping diagram rendering");
@@ -243,8 +246,9 @@ const CONFIG = {
 
 mkdirSync(CACHE, { recursive: true });
 
-const MERMAID_ENTRY = require.resolve("mermaid/dist/mermaid.min.js");
-const MERMAID_VERSION = require("mermaid/package.json").version;
+if (!ensureDeps(["mermaid"], ROOT)) process.exit(1);
+const MERMAID_ENTRY = tryResolve("mermaid/dist/mermaid.min.js", ROOT);
+const MERMAID_VERSION = tryRequire("mermaid/package.json", ROOT).version;
 
 const key = (source) =>
   createHash("sha256")
@@ -278,25 +282,10 @@ const misses = all.filter((d) => !existsSync(d.path));
 
 // --- Render -----------------------------------------------------------------
 
-// Resolved lazily, and from the *site* rather than from this file: a plain
-// import would resolve relative to themes/broadside/ and walk out of the site
-// entirely when the theme is symlinked rather than vendored. Lazily, because a
-// run where every diagram hits the cache never needs a browser at all.
-function loadChromium() {
-  try {
-    return require("playwright-core").chromium;
-  } catch {
-    console.error(
-      "diagrams: playwright-core not found. Install it in your site:\n" +
-        "      npm install --save-dev playwright-core\n" +
-        "      npx playwright install chromium",
-    );
-    process.exit(1);
-  }
-}
-
+// Resolved lazily: a run where every diagram hits the cache never needs a
+// browser at all, and shouldn't install or launch one.
 if (misses.length > 0) {
-  const browser = await loadChromium().launch();
+  const browser = await loadChromium(ROOT).launch();
   try {
     const page = await browser.newPage();
     // The same font stack the page will render the SVG in. Mermaid measures

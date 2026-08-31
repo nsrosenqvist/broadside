@@ -4,10 +4,13 @@
 //
 //   node themes/broadside/scripts/build-og-images.mjs
 //
-// It needs `playwright-core` and a Chromium:
+// Or, together with `zola build` and the diagram pass, as:
 //
-//   npm install --save-dev playwright-core
-//   npx playwright install chromium
+//   node themes/broadside/scripts/broadside.mjs build
+//
+// It needs `playwright-core` and a Chromium. Those are the theme's own
+// dependencies and are installed into themes/broadside on first use, so a site
+// needs to declare nothing; see scripts/lib/deps.mjs.
 //
 // How it works:
 //   - Set `og_card = "og.png"` under [extra] in config.toml. The theme then
@@ -29,6 +32,7 @@
 //   OG_LOCALE         date locale (default en-US)
 //   OG_SITE_KICKER    kicker on the site-wide card (default: none)
 //   OG_SITE_TAGLINE   tagline on the site-wide card (default: site description)
+//   OG_CACHE_DIR      cache location (default: <theme>/.cache/og)
 //   SITE_ROOT         site root, if not the current working directory
 
 import {
@@ -42,7 +46,7 @@ import {
 } from "node:fs";
 import { join, dirname } from "node:path";
 import { createHash } from "node:crypto";
-import { createRequire } from "node:module";
+import { cacheDir, loadChromium } from "./lib/deps.mjs";
 
 const ROOT = process.env.SITE_ROOT ?? process.cwd();
 const DIST = join(ROOT, "public");
@@ -56,8 +60,9 @@ const SITE_TAGLINE = process.env.OG_SITE_TAGLINE ?? null;
 
 // Content-addressed card cache: keyed by the sha256 of each card's rendered
 // HTML, so a card only re-renders when its data or this template changes.
-// Persist it across CI runs to skip Chromium entirely on most builds.
-const CACHE = join(ROOT, ".og-cache");
+// Persist it across CI runs to skip Chromium entirely on most builds. It lives
+// inside the theme so a site needs no gitignore entry for it.
+const CACHE = cacheDir("og", process.env.OG_CACHE_DIR);
 
 if (process.env.OG_IMAGE_SKIP === "1") {
   console.log("OG_IMAGE_SKIP=1 — skipping og image generation");
@@ -251,23 +256,8 @@ function defaultCard() {
   `);
 }
 
-// Resolved lazily, and from the *site* rather than from this file: a plain
-// import would resolve relative to themes/broadside/ and walk out of the site
-// entirely when the theme is symlinked rather than vendored. Lazily, because a
-// run that skips generation or hits the cache for every card never needs a
-// browser at all — and shouldn't fail for want of one.
-function loadChromium() {
-  try {
-    return createRequire(join(ROOT, "package.json"))("playwright-core").chromium;
-  } catch {
-    console.error(
-      "og: playwright-core not found. Install it in your site:\n" +
-        "      npm install --save-dev playwright-core\n" +
-        "      npx playwright install chromium",
-    );
-    process.exit(1);
-  }
-}
+// Resolved lazily: a run that skips generation or hits the cache for every
+// card never needs a browser at all, and shouldn't install or launch one.
 
 // --- Render -----------------------------------------------------------------
 
@@ -288,7 +278,7 @@ const cards = [
 const misses = cards.filter((c) => !existsSync(c.cached));
 
 if (misses.length > 0) {
-  const browser = await loadChromium().launch();
+  const browser = await loadChromium(ROOT).launch();
   try {
     const context = await browser.newContext({
       viewport: { width: 1200, height: 630 },

@@ -4,3 +4,9 @@
 # Zola build output, if the theme is ever built in place rather than through
 # dev.sh (which builds into /tmp)
 public/
+
+# Build dependencies, installed here on first use by scripts/lib/deps.mjs
+node_modules/
+
+# Render caches for og cards and diagrams (content-addressed, safe to delete)
+.cache/

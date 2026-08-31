@@ -1,0 +1,12 @@
+{
+  "name": "broadside",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Build-time dependencies for the Broadside Zola theme's og card and diagram renderers. A site using the theme does not need to declare these itself — scripts/broadside.mjs installs them here on first run.",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "mermaid": "^11.17.2",
+    "playwright-core": "^1.61.1"
+  }
+}
